@@ -9,7 +9,6 @@ from .locations import LocationTests
 from .media import MediaTests
 from .misc import MiscTests
 from .tags import TagsTests
-from .upload import UploadTests
 from .users import UsersTests
 from .usertags import UsertagsTests
 from .highlights import HighlightsTests

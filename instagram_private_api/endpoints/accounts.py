@@ -1,21 +1,7 @@
 import json
 
-from ..compat import (
-    compat_urllib_request, compat_urllib_error,
-    compat_http_client
-)
-from ..errors import (
-    ErrorHandler, ClientError, ClientLoginError, ClientConnectionError
-)
-from ..http import MultipartFormDataEncoder
+from ..errors import ClientError, ClientLoginError
 from ..compatpatch import ClientCompatPatch
-from socket import timeout, error as SocketError
-from ssl import SSLError
-try:
-    ConnectionError = ConnectionError       # pylint: disable=redefined-builtin
-except NameError:  # Python 2:
-    class ConnectionError(Exception):
-        pass
 
 
 class AccountsEndpointsMixin:
@@ -128,46 +114,7 @@ class AccountsEndpointsMixin:
         :param photo_data: byte string of image
         :return:
         """
-        endpoint = 'accounts/change_profile_picture/'
-        json_params = json.dumps(self.authenticated_params)
-        hash_sig = self._generate_signature(json_params)
-        fields = [
-            ('ig_sig_key_version', self.key_version),
-            ('signed_body', hash_sig + '.' + json_params)
-        ]
-        files = [
-            ('profile_pic', 'profile_pic', 'application/octet-stream', photo_data)
-        ]
-
-        content_type, body = MultipartFormDataEncoder().encode(fields, files)
-
-        headers = self.default_headers
-        headers['Content-Type'] = content_type
-        headers['Content-Length'] = len(body)
-
-        endpoint_url = '{}{}'.format(self.api_url.format(version='v1'), endpoint)
-        req = compat_urllib_request.Request(endpoint_url, body, headers=headers)
-        try:
-            self.logger.debug(f'POST {endpoint_url}')
-            response = self.opener.open(req, timeout=self.timeout)
-        except compat_urllib_error.HTTPError as e:
-            error_response = self._read_response(e)
-            self.logger.debug(f'RESPONSE: {e.code} {error_response}')
-            ErrorHandler.process(e, error_response)
-        except (SSLError, timeout, SocketError,
-                compat_urllib_error.URLError,   # URLError is base of HTTPError
-                compat_http_client.HTTPException) as connection_error:
-            raise ClientConnectionError('{} {}'.format(
-                connection_error.__class__.__name__, str(connection_error)))
-
-        post_response = self._read_response(response)
-        self.logger.debug(f'RESPONSE: {response.code} {post_response}')
-        json_response = json.loads(post_response)
-
-        if self.auto_patch:
-            ClientCompatPatch.user(json_response['user'], drop_incompat_keys=self.drop_incompat_keys)
-
-        return json_response
+        raise NotImplementedError("Changing profile pictures is not supported yet.")
 
     def set_account_private(self):
         """Make account private"""

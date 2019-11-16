@@ -15,11 +15,7 @@ try:
         ClientLoginRequiredError, MediaTypes,
         ClientSentryBlockError, ClientCheckpointRequiredError,
         ClientChallengeRequiredError)
-    from instagram_private_api.utils import (
-        InstagramID, gen_user_breadcrumb,
-        max_chunk_size_generator, max_chunk_count_generator, get_file_size,
-        ig_chunk_generator
-    )   # noqa
+    from instagram_private_api.utils import InstagramID, gen_user_breadcrumb  # noqa
     from instagram_private_api.constants import Constants
     from instagram_private_api.compat import compat_urllib_parse
 except ImportError:
@@ -30,11 +26,7 @@ except ImportError:
         ClientLoginRequiredError, MediaTypes,
         ClientSentryBlockError, ClientCheckpointRequiredError,
         ClientChallengeRequiredError)
-    from instagram_private_api.utils import (
-        InstagramID, gen_user_breadcrumb,
-        max_chunk_size_generator, max_chunk_count_generator, get_file_size,
-        ig_chunk_generator
-    )   # noqa
+    from instagram_private_api.utils import InstagramID, gen_user_breadcrumb  #noqa
     from instagram_private_api.constants import Constants
     from instagram_private_api.compat import compat_urllib_parse
 

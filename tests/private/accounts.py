@@ -1,16 +1,9 @@
 import unittest
 import json
-try:
-    # python 2.x
-    from urllib2 import urlopen
-except ImportError:
-    # python 3.x
-    from urllib.request import urlopen
-from io import BytesIO
 
 from ..common import (
     Client, ClientError, ClientLoginError,
-    ApiTestBase, compat_mock, compat_urllib_error, MockResponse
+    ApiTestBase, compat_mock
 )
 
 
@@ -61,10 +54,6 @@ class AccountTests(ApiTestBase):
                 'test': AccountTests('test_set_account_private_mock', api)
             },
             {
-                'name': 'test_change_profile_picture',
-                'test': AccountTests('test_change_profile_picture', api)
-            },
-            {
                 'name': 'test_current_user',
                 'test': AccountTests('test_current_user', api)
             },
@@ -83,10 +72,6 @@ class AccountTests(ApiTestBase):
             {
                 'name': 'test_logout_mock',
                 'test': AccountTests('test_logout_mock', api)
-            },
-            {
-                'name': 'test_change_profile_picture_mock',
-                'test': AccountTests('test_change_profile_picture_mock', api)
             },
             {
                 'name': 'test_presence_status',
@@ -278,15 +263,6 @@ class AccountTests(ApiTestBase):
             params=self.api.authenticated_params)
 
     @unittest.skip('Modifies data.')
-    def test_change_profile_picture(self):
-        sample_url = 'https://c2.staticflickr.com/8/7162/6461496097_fdb8d1f7cc_b.jpg'
-        res = urlopen(sample_url)
-        photo_data = res.read()
-        results = self.api.change_profile_picture(photo_data)
-        self.assertEqual(results.get('status'), 'ok')
-        self.assertIsNotNone(results.get('user'))
-
-    @unittest.skip('Modifies data.')
     def test_set_account_public(self):
         results = self.api.set_account_public()
         self.assertEqual(results.get('status'), 'ok')
@@ -337,59 +313,6 @@ class AccountTests(ApiTestBase):
                 '_uuid': self.api.uuid
             },
             unsigned=True)
-
-    @compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.OpenerDirector.open')
-    def test_change_profile_picture_mock(self, opener):
-        opener.side_effect = [
-            MockResponse(),
-            compat_urllib_error.HTTPError(
-                self.api.api_url, 500, 'Internal Server Error', {},
-                BytesIO(b'Internal Server Error'))
-        ]
-        with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
-                compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
-                compat_mock.patch('instagram_private_api.endpoints.accounts.compat_urllib_request.Request') \
-                as request, \
-                compat_mock.patch('instagram_private_api.http.random.choice') as randchoice_mock:
-            default_headers.return_value = {'Header': 'X'}
-            randchoice_mock.return_value = 'x'
-            read_response.return_value = json.dumps(
-                {'status': 'ok',
-                 'user': {'pk': 123, 'biography': '', 'profile_pic_url': '', 'external_url': ''}})
-
-            photo_data = b'...'
-            json_params = json.dumps(self.api.authenticated_params)
-            hash_sig = self.api._generate_signature(json_params)
-            signed_body = hash_sig + '.' + json_params
-            headers = self.api.default_headers
-            headers.update({
-                'Content-Type': f'multipart/form-data; boundary={self.api.uuid}',
-                'Content-Length': len(photo_data)
-            })
-            body = '--%(boundary)s\r\n' \
-                   'Content-Disposition: form-data; name="ig_sig_key_version"\r\n\r\n' \
-                   '%(sig_version)s\r\n' \
-                   '--%(boundary)s\r\n' \
-                   'Content-Disposition: form-data; name="signed_body"\r\n\r\n' \
-                   '%(signed_body)s\r\n' \
-                   '--%(boundary)s\r\n' \
-                   'Content-Disposition: form-data; name="profile_pic"; filename="profile_pic"\r\n' \
-                   'Content-Type: application/octet-stream\r\n' \
-                   'Content-Transfer-Encoding: binary\r\n\r\n...\r\n' \
-                   '--%(boundary)s--\r\n' % {
-                       'boundary': 'x' * 30,
-                       'signed_body': signed_body,
-                       'sig_version': self.api.key_version
-                   }
-
-            self.api.change_profile_picture(photo_data)
-            endpoint_url = '{}{}'.format(self.api.api_url.format(version='v1'), 'accounts/change_profile_picture/')
-            request.assert_called_with(
-                endpoint_url, body.encode('ascii'), headers=headers)
-
-            with self.assertRaises(ClientError) as he:
-                self.api.change_profile_picture(photo_data)
-            self.assertEqual(str(he.exception), 'Internal Server Error')
 
     def test_presence_status(self):
         results = self.api.presence_status()

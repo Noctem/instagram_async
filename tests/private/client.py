@@ -6,8 +6,7 @@ from ..common import (
     ClientError, ClientLoginRequiredError,
     ClientSentryBlockError, ClientCheckpointRequiredError,
     ClientChallengeRequiredError, Constants,
-    gen_user_breadcrumb, max_chunk_size_generator, max_chunk_count_generator,
-    compat_mock, compat_urllib_error,
+    gen_user_breadcrumb, compat_mock, compat_urllib_error,
     MockResponse
 )
 
@@ -37,14 +36,6 @@ class ClientTests(ApiTestBase):
             {
                 'name': 'test_gen_user_breadcrumb',
                 'test': ClientTests('test_gen_user_breadcrumb', api)
-            },
-            {
-                'name': 'test_max_chunk_size_generator',
-                'test': ClientTests('test_max_chunk_size_generator', api)
-            },
-            {
-                'name': 'test_max_chunk_count_generator',
-                'test': ClientTests('test_max_chunk_count_generator', api)
             },
             {
                 'name': 'test_settings',
@@ -138,32 +129,6 @@ class ClientTests(ApiTestBase):
         self.sleep_interval = 0
         output = gen_user_breadcrumb(15)
         self.assertIsNotNone(output)
-
-    def test_max_chunk_size_generator(self):
-        self.sleep_interval = 0
-        chunk_data = 'abcdefghijklmnopqrstuvwxyz'
-        chunk_size = 5
-        chunk_count = 0
-        for chunk_info, data in max_chunk_size_generator(chunk_size, chunk_data):
-            chunk_count += 1
-            self.assertIsNotNone(data, 'Empty chunk.')
-            self.assertLessEqual(len(data), chunk_size, 'Chunk size is too big.')
-            self.assertEqual(len(data), chunk_info.length, 'Chunk length is wrong.')
-            self.assertEqual(chunk_info.is_first, chunk_count == 1)
-
-    def test_max_chunk_count_generator(self):
-        self.sleep_interval = 0
-        chunk_data = 'abcdefghijklmnopqrstuvwxyz'
-        expected_chunk_count = 5
-        chunk_count = 0
-        for chunk_info, data in max_chunk_count_generator(expected_chunk_count, chunk_data):
-            chunk_count += 1
-            self.assertIsNotNone(data, 'Empty chunk.')
-            self.assertEqual(len(data), chunk_info.length, 'Chunk length is wrong.')
-            self.assertEqual(chunk_info.is_first, chunk_count == 1)
-            self.assertEqual(chunk_info.is_last, chunk_count == expected_chunk_count)
-
-        self.assertEqual(chunk_count, expected_chunk_count, 'Chunk count is wrong.')
 
     def test_settings(self):
         self.sleep_interval = 0

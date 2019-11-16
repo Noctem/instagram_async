@@ -11,10 +11,9 @@ from .private import (
     AccountTests, CollectionsTests, DiscoverTests,
     FeedTests, FriendshipTests, LiveTests,
     LocationTests, MediaTests, MiscTests,
-    TagsTests, UploadTests, UsersTests,
-    UsertagsTests, HighlightsTests,
-    ClientTests, ApiUtilsTests, CompatPatchTests,
-    IGTVTests,
+    TagsTests, UsersTests, UsertagsTests,
+    HighlightsTests, ClientTests, ApiUtilsTests,
+    CompatPatchTests, IGTVTests
 )
 from .common import (
     Client, ClientError, ClientLoginError, ClientCookieExpiredError,
@@ -132,7 +131,6 @@ if __name__ == '__main__':
     tests.extend(MediaTests.init_all(api))
     tests.extend(MiscTests.init_all(api))
     tests.extend(TagsTests.init_all(api))
-    tests.extend(UploadTests.init_all(api))
     tests.extend(UsersTests.init_all(api))
     tests.extend(UsertagsTests.init_all(api))
     tests.extend(HighlightsTests.init_all(api))
