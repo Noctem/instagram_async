@@ -1,6 +1,7 @@
 import logging
-import json
 import re
+
+from .compat import jdumps, jloads
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class ClientCheckpointRequiredError(ClientError):
     @property
     def challenge_url(self):
         try:
-            error_info = json.loads(self.error_response)
+            error_info = jloads(self.error_response)
             return error_info.get('challenge', {}).get('url') or error_info.get('checkpoint_url')
         except ValueError as ve:
             logger.warning(f'Error parsing error response: {ve}')
@@ -115,19 +116,19 @@ class ErrorHandler:
                 error_response=error_response)
 
         try:
-            error_obj = json.loads(error_response)
+            error_obj = jloads(error_response)
             error_message_type = error_obj.get('error_type', '') or error_obj.get('message', '')
             if http_error.code == ClientErrorCodes.TOO_MANY_REQUESTS:
                 raise ClientThrottledError(
                     error_obj.get('message'), code=http_error.code,
-                    error_response=json.dumps(error_obj))
+                    error_response=jdumps(error_obj))
 
             for error_info in ErrorHandler.KNOWN_ERRORS_MAP:
                 for p in error_info['patterns']:
                     if re.search(p, error_message_type):
                         raise error_info['error'](
                             error_message_type, code=http_error.code,
-                            error_response=json.dumps(error_obj)
+                            error_response=jdumps(error_obj)
                         )
             if error_message_type:
                 error_msg = f'{http_error.reason}: {error_message_type}'

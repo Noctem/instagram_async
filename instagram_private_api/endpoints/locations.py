@@ -1,8 +1,8 @@
-import json
 import time
 
-from ..utils import raise_if_invalid_rank_token
+from ..compat import jdumps
 from ..compatpatch import ClientCompatPatch
+from ..utils import raise_if_invalid_rank_token
 
 
 class LocationsEndpointsMixin:
@@ -42,8 +42,8 @@ class LocationsEndpointsMixin:
         """
         endpoint = f'locations/{location_id}/related/'
         query = {
-            'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
-            'related_types': json.dumps(['location'], separators=(',', ':'))}
+            'visited': jdumps([{'id': location_id, 'type': 'location'}]),
+            'related_types': '["location"]'}
         query.update(kwargs)
         return self._call_api(endpoint, query=query)
 
@@ -87,7 +87,7 @@ class LocationsEndpointsMixin:
             'query': query,
             'timezone_offset': self.timezone_offset,
             'count': 30,
-            'exclude_list': json.dumps(exclude_list, separators=(',', ':')),
+            'exclude_list': jdumps(exclude_list),
             'rank_token': rank_token,
         }
         query_params.update(kwargs)
@@ -126,7 +126,7 @@ class LocationsEndpointsMixin:
         if kwargs.get('page'):
             params['page'] = kwargs.pop('page')
         if kwargs.get('next_media_ids'):
-            params['next_media_ids'] = json.dumps(kwargs.pop('next_media_ids'), separators=(',', ':'))
+            params['next_media_ids'] = jdumps(kwargs.pop('next_media_ids'))
         kwargs.pop('max_id', None)
         kwargs.pop('page', None)
         kwargs.pop('next_media_ids', None)

@@ -1,4 +1,4 @@
-import json
+from ..compat import jdumps
 from ..compatpatch import ClientCompatPatch
 
 
@@ -57,7 +57,7 @@ class CollectionsEndpointsMixin:
         if added_media_ids and isinstance(added_media_ids, str):
             added_media_ids = [added_media_ids]
         if added_media_ids:
-            params['added_media_ids'] = json.dumps(added_media_ids, separators=(',', ':'))
+            params['added_media_ids'] = jdumps(added_media_ids)
         params.update(self.authenticated_params)
         return self._call_api('collections/create/', params=params)
 
@@ -72,7 +72,7 @@ class CollectionsEndpointsMixin:
         if isinstance(added_media_ids, str):
             added_media_ids = [added_media_ids]
         params = {
-            'added_media_ids': json.dumps(added_media_ids, separators=(',', ':'))
+            'added_media_ids': jdumps(added_media_ids)
         }
         params.update(self.authenticated_params)
         endpoint = f'collections/{collection_id}/edit/'

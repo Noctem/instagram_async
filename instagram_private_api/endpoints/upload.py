@@ -1,10 +1,10 @@
-import json
 import time
 import warnings
 
 from random import randint
 
 from .common import ClientDeprecationWarning
+from ..compat import jdumps
 from ..compatpatch import ClientCompatPatch
 
 
@@ -170,7 +170,7 @@ class UploadEndpointsMixin:
         }
         if location:
             media_loc = self._validate_location(location)
-            params['location'] = json.dumps(media_loc)
+            params['location'] = jdumps(media_loc)
             if 'lat' in location and 'lng' in location:
                 params['geotag_enabled'] = '1'
                 params['exif_latitude'] = '0.0'
@@ -245,7 +245,7 @@ class UploadEndpointsMixin:
             params['disable_comments'] = '1'
         if location:
             media_loc = self._validate_location(location)
-            params['location'] = json.dumps(media_loc)
+            params['location'] = jdumps(media_loc)
             if 'lat' in location and 'lng' in location:
                 params['geotag_enabled'] = '1'
                 params['av_latitude'] = '0.0'

@@ -1,5 +1,4 @@
-import json
-
+from ..compat import jloads
 from ..errors import ClientError, ClientLoginError
 from ..compatpatch import ClientCompatPatch
 
@@ -40,7 +39,7 @@ class AccountsEndpointsMixin:
                 'Unable to get csrf from login.',
                 error_response=self._read_response(login_response))
 
-        login_json = json.loads(self._read_response(login_response))
+        login_json = jloads(self._read_response(login_response))
 
         if not login_json.get('logged_in_user', {}).get('pk'):
             raise ClientLoginError('Unable to login.')
@@ -143,10 +142,9 @@ class AccountsEndpointsMixin:
 
     def presence_status(self):
         """Get presence status setting"""
-        json_params = json.dumps({}, separators=(',', ':'))
         query = {
             'ig_sig_key_version': self.key_version,
-            'signed_body': self._generate_signature(json_params) + '.' + json_params
+            'signed_body': self._generate_signature('{}') + '.{}'
         }
         return self._call_api('accounts/get_presence_disabled/', query=query)
 

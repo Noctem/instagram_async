@@ -1,5 +1,4 @@
 from os import path
-import io
 try:
     from setuptools import setup
 except ImportError:
@@ -31,6 +30,7 @@ setup(
     license='MIT',
     url='https://github.com/ping/instagram_private_api/tree/master',
     install_requires=[],
+    extra_requires={'fast_json': ['orjson']},
     test_requires=test_reqs,
     keywords='instagram private api',
     description='A client interface for the private Instagram API.',

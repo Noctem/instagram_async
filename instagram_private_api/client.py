@@ -9,7 +9,6 @@ import logging
 import hmac
 import hashlib
 import uuid
-import json
 import re
 import time
 import random
@@ -22,7 +21,7 @@ from ssl import SSLError
 from .compat import (
     compat_urllib_parse, compat_urllib_error,
     compat_urllib_request, compat_urllib_parse_urlparse,
-    compat_http_client)
+    compat_http_client, jdumps, jloads)
 from .errors import (
     ErrorHandler, ClientError,
     ClientLoginRequiredError, ClientCookieExpiredError,
@@ -497,7 +496,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 data = b''
             else:
                 if not unsigned:
-                    json_params = json.dumps(params, separators=(',', ':'))
+                    json_params = jdumps(params)
                     hash_sig = self._generate_signature(json_params)
                     post_params = {
                         'ig_sig_key_version': self.key_version,
@@ -529,17 +528,17 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
         response_content = self._read_response(response)
         self.logger.debug(f'RESPONSE: {response.code} {response_content}')
-        json_response = json.loads(response_content)
+        json_response = jloads(response_content)
 
         if json_response.get('message', '') == 'login_required':
             raise ClientLoginRequiredError(
                 json_response.get('message'), code=response.code,
-                error_response=json.dumps(json_response))
+                error_response=jdumps(json_response))
 
         # not from oembed or an ok response
         if not json_response.get('provider_url') and json_response.get('status', '') != 'ok':
             raise ClientError(
                 json_response.get('message', 'Unknown error'), code=response.code,
-                error_response=json.dumps(json_response))
+                error_response=jdumps(json_response))
 
         return json_response

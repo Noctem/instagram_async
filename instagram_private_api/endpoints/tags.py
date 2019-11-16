@@ -1,5 +1,4 @@
-import json
-
+from ..compat import jdumps
 from ..utils import raise_if_invalid_rank_token
 from ..compatpatch import ClientCompatPatch
 
@@ -27,8 +26,8 @@ class TagsEndpointsMixin:
         """
         endpoint = f'tags/{tag}/related/'
         query = {
-            'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
-            'related_types': json.dumps(['hashtag', 'location'], separators=(',', ':'))}
+            'visited': jdumps([{'id': tag, 'type': 'hashtag'}]),
+            'related_types': '["hashtag","location"]'}
         res = self._call_api(endpoint, query=query)
         return res
 
@@ -50,7 +49,7 @@ class TagsEndpointsMixin:
             'q': text,
             'timezone_offset': self.timezone_offset,
             'count': 30,
-            'exclude_list': json.dumps(exclude_list, separators=(',', ':')),
+            'exclude_list': jdumps(exclude_list),
             'rank_token': rank_token,
         }
         query.update(kwargs)
@@ -112,7 +111,7 @@ class TagsEndpointsMixin:
         endpoint = f'tags/{tag}/sections/'
 
         params = {
-            'supported_tabs': json.dumps(valid_tabs, separators=(',', ':')),
+            'supported_tabs': jdumps(valid_tabs),
             'tab': tab,
             'include_persistent': True,
         }
@@ -123,7 +122,7 @@ class TagsEndpointsMixin:
         if kwargs.get('page'):
             params['page'] = kwargs.pop('page')
         if kwargs.get('next_media_ids'):
-            params['next_media_ids'] = json.dumps(kwargs.pop('next_media_ids'), separators=(',', ':'))
+            params['next_media_ids'] = jdumps(kwargs.pop('next_media_ids'))
         kwargs.pop('max_id', None)
         kwargs.pop('page', None)
         kwargs.pop('next_media_ids', None)

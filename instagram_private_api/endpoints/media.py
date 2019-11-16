@@ -1,12 +1,13 @@
-import json
 import re
 import warnings
 import time
+
 from random import randint
 
 from .common import ClientExperimentalWarning, MediaTypes
-from ..utils import gen_user_breadcrumb
+from ..compat import jdumps
 from ..compatpatch import ClientCompatPatch
+from ..utils import gen_user_breadcrumb
 
 
 class MediaEndpointsMixin:
@@ -188,7 +189,7 @@ class MediaEndpointsMixin:
         params.update(self.authenticated_params)
         if usertags:
             utags = {'in': [{'user_id': u['user_id'], 'position': u['position']} for u in usertags]}
-            params['usertags'] = json.dumps(utags, separators=(',', ':'))
+            params['usertags'] = jdumps(utags)
         res = self._call_api(endpoint, params=params)
         if self.auto_patch:
             ClientCompatPatch.media(res.get('media'))
@@ -475,7 +476,7 @@ class MediaEndpointsMixin:
         if added_collection_ids:
             if isinstance(added_collection_ids, str):
                 added_collection_ids = [added_collection_ids]
-            params['added_collection_ids'] = json.dumps(added_collection_ids, separators=(',', ':'))
+            params['added_collection_ids'] = jdumps(added_collection_ids)
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
 
@@ -495,7 +496,7 @@ class MediaEndpointsMixin:
         if removed_collection_ids:
             if isinstance(removed_collection_ids, str):
                 removed_collection_ids = [removed_collection_ids]
-            params['removed_collection_ids'] = json.dumps(removed_collection_ids, separators=(',', ':'))
+            params['removed_collection_ids'] = jdumps(removed_collection_ids)
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
 

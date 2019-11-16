@@ -1,4 +1,4 @@
-import json
+from ..compat import jdumps
 
 
 class HighlightsEndpointsMixin:
@@ -73,12 +73,11 @@ class HighlightsEndpointsMixin:
 
         cover = {
             'media_id': cover_media_id,
-            'crop_rect': json.dumps(
-                [0.0, 0.21830457, 1.0, 0.78094524], separators=(',', ':'))
+            'crop_rect': '[0.0,0.21830457,1.0,0.78094524]'
         }
         params = {
-            'media_ids': json.dumps(media_ids, separators=(',', ':')),
-            'cover': json.dumps(cover, separators=(',', ':')),
+            'media_ids': jdumps(media_ids),
+            'cover': jdumps(cover),
             'source': source,
             'title': title,
         }
@@ -119,8 +118,8 @@ class HighlightsEndpointsMixin:
             raise ValueError('No edited values')
 
         params = {
-            'added_media_ids': json.dumps(added_media_ids, separators=(',', ':')),
-            'removed_media_ids': json.dumps(removed_media_ids, separators=(',', ':')),
+            'added_media_ids': jdumps(added_media_ids),
+            'removed_media_ids': jdumps(removed_media_ids),
             'source': source,
         }
         if title:
@@ -128,10 +127,9 @@ class HighlightsEndpointsMixin:
         if cover_media_id:
             cover = {
                 'media_id': cover_media_id,
-                'crop_rect': json.dumps(
-                    [0.0, 0.21830457, 1.0, 0.78094524], separators=(',', ':'))
+                'crop_rect': '[0.0,0.21830457,1.0,0.78094524]'
             }
-            params['cover'] = json.dumps(cover, separators=(',', ':'))
+            params['cover'] = jdumps(cover)
 
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
