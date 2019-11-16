@@ -14,7 +14,7 @@ No. This library will not support account creation because of abuse by spammers.
 Can I _____ with this library?
 ---------------------------------
 
-This library is limited to what the mobile app/web interface can do. If you can't do it on those platforms, you can't do it through the library.
+This library is limited to what the mobile app can do. If you can't do it on that platform, you can't do it through the library.
 
 What does error code XXX mean?
 ------------------------------
@@ -43,7 +43,7 @@ With the new sig key and app version, you can modify the client like so
 .. code-block:: python
 
     new_app_version = '10.3.2'
-    new_sig_key = '5ad7d6f013666cc93c88fc8af940348bd067b68f0dce3c85122a923f4f74b251'
+    new_sig_key = b'5ad7d6f013666cc93c88fc8af940348bd067b68f0dce3c85122a923f4f74b251'
     new_key_ver = '4'           # does not freq change
     new_ig_capa = '3ToAAA=='    # does not freq change
 

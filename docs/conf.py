@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # instagram_private_api documentation build configuration file, created by
 # sphinx-quickstart on Fri Jan 13 15:42:33 2017.
@@ -49,8 +50,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'instagram_private_api'
-copyright = '2017, ping'
-author = 'ping'
+copyright = '2019, Noctem'
+author = 'Noctem'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

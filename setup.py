@@ -1,16 +1,15 @@
-from os import path
+from os.path import abspath, dirname, join
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-
 try:
     import unittest.mock
     has_mock = True
 except ImportError:
     has_mock = False
 
-__author__ = 'ping <lastmodified@gmail.com>'
+__author__ = 'Noctem <mail@noctem.xyz>'
 __version__ = '1.6.0'
 
 packages = [
@@ -19,20 +18,20 @@ packages = [
 ]
 test_reqs = [] if has_mock else ['mock']
 
-with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'), encoding='utf-8') as f:
+with open(join(abspath(dirname(__file__)), 'README.md'), 'rt') as f:
     long_description = f.read()
 
 setup(
-    name='instagram_private_api',
+    name='instagram_async',
     version=__version__,
-    author='ping',
-    author_email='lastmodified@gmail.com',
+    author='Noctem',
+    author_email='mail@noctem.xyz',
     license='MIT',
-    url='https://github.com/ping/instagram_private_api/tree/master',
-    install_requires=[],
+    url='https://github.com/Noctem/instagram_private_api',
+    install_requires=['aiohttp'],
     extra_requires={'fast_json': ['orjson']},
     test_requires=test_reqs,
-    keywords='instagram private api',
+    keywords='instagram private api asyncio',
     description='A client interface for the private Instagram API.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -43,8 +42,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ]
 )
