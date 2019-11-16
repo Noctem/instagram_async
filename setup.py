@@ -16,8 +16,7 @@ __version__ = '1.6.0'
 
 packages = [
     'instagram_private_api',
-    'instagram_private_api.endpoints',
-    'instagram_web_api'
+    'instagram_private_api.endpoints'
 ]
 test_reqs = [] if has_mock else ['mock']
 

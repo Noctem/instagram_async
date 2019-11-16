@@ -38,26 +38,6 @@ except ImportError:
     from instagram_private_api.constants import Constants
     from instagram_private_api.compat import compat_urllib_parse
 
-try:
-    from instagram_web_api import (
-        __version__ as __webversion__,
-        Client as WebClient,
-        ClientError as WebClientError,
-        ClientLoginError as WebClientLoginError,
-        ClientCookieExpiredError as WebClientCookieExpiredError,
-        ClientCompatPatch as WebClientCompatPatch)
-    from instagram_web_api.compat import compat_urllib_error
-except ImportError:
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from instagram_web_api import (
-        __version__ as __webversion__,
-        Client as WebClient,
-        ClientError as WebClientError,
-        ClientLoginError as WebClientLoginError,
-        ClientCookieExpiredError as WebClientCookieExpiredError,
-        ClientCompatPatch as WebClientCompatPatch)
-    from instagram_web_api.compat import compat_urllib_error
-
 
 def to_json(python_object):
     if isinstance(python_object, bytes):
@@ -94,36 +74,6 @@ class ApiTestBase(unittest.TestCase):
 
     def setUp(self):
         pass
-
-    def tearDown(self):
-        time.sleep(self.sleep_interval)
-
-
-class WebApiTestBase(unittest.TestCase):
-    """Main base class for web api tests."""
-
-    def __init__(self, testname, api):
-        super(WebApiTestBase, self).__init__(testname)
-        self.api = api
-        self.sleep_interval = 2.5
-        if testname.endswith('_mock'):
-            self.sleep_interval = 0   # sleep a bit between tests to avoid HTTP429 errors
-
-    @classmethod
-    def setUpClass(cls):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-        self.test_user_id = '25025320'
-        self.test_user_name = 'instagram'
-        self.test_media_shortcode = 'BJL-gjsDyo1'
-        self.test_media_shortcode2 = 'BVRqQxmj2TA'
-        self.test_media_id = '1009392755603152985'
-        self.test_comment_id = '1234567890'
 
     def tearDown(self):
         time.sleep(self.sleep_interval)

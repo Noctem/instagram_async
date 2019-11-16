@@ -21,7 +21,6 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 # import instagram_private_api
-# import instagram_web_api
 
 # -- General configuration ------------------------------------------------
 
