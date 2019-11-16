@@ -1,7 +1,6 @@
 import re
 import warnings
 import time
-
 from random import randint
 
 from .common import ClientExperimentalWarning, MediaTypes
@@ -13,7 +12,7 @@ from ..utils import gen_user_breadcrumb
 class MediaEndpointsMixin:
     """For endpoints in ``/media/``."""
 
-    def media_info(self, media_id):
+    async def media_info(self, media_id):
         """
         Get media info
 
@@ -21,13 +20,13 @@ class MediaEndpointsMixin:
         :return:
         """
         endpoint = f'media/{media_id}/info/'
-        res = self._call_api(endpoint)
+        res = await self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def medias_info(self, media_ids):
+    async def medias_info(self, media_ids):
         """
         Get multiple media infos
 
@@ -45,13 +44,13 @@ class MediaEndpointsMixin:
             'ranked_content': 'true',
             'include_inactive_reel': 'true',
         }
-        res = self._call_api('media/infos/', query=params)
+        res = await self._call_api('media/infos/', query=params)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def media_permalink(self, media_id):
+    async def media_permalink(self, media_id):
         """
         Get media permalink
 
@@ -59,10 +58,10 @@ class MediaEndpointsMixin:
         :return:
         """
         endpoint = f'media/{media_id}/permalink/'
-        res = self._call_api(endpoint)
+        res = await self._call_api(endpoint)
         return res
 
-    def media_comments(self, media_id, **kwargs):
+    async def media_comments(self, media_id, **kwargs):
         """
         Get media comments. Fixed at 20 comments returned per page.
 
@@ -71,13 +70,12 @@ class MediaEndpointsMixin:
             **max_id**: For pagination
         :return:
         """
-        endpoint = f'media/{media_id}/comments/'
         query = {
             'can_support_threading': 'true'
         }
         if kwargs:
             query.update(kwargs)
-        res = self._call_api(endpoint, query=query)
+        res = await self._call_api(f'media/{media_id}/comments/', query=query)
 
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
@@ -86,7 +84,7 @@ class MediaEndpointsMixin:
              for c in res.get('preview_comments', [])]
         return res
 
-    def media_n_comments(self, media_id, n=150, reverse=False, **kwargs):
+    async def media_n_comments(self, media_id, n=150, reverse=False, **kwargs):
         """
         Helper method to retrieve n number of comments for a media id
 
@@ -100,7 +98,7 @@ class MediaEndpointsMixin:
         endpoint = f'media/{media_id}/comments/'
 
         comments = []
-        results = self._call_api(endpoint, query=kwargs)
+        results = await self._call_api(endpoint, query=kwargs)
         comments.extend(results.get('comments', []))
 
         while (((results.get('has_more_comments') and results.get('next_max_id'))
@@ -112,7 +110,7 @@ class MediaEndpointsMixin:
             else:
                 kwargs.update({'min_id': results.get('next_min_id')})
 
-            results = self._call_api(endpoint, query=kwargs)
+            results = await self._call_api(endpoint, query=kwargs)
             comments.extend(results.get('comments', []))
             if not (results.get('next_max_id') or results.get('next_min_id') or results.get('comments')):
                 # bail out if no max_id/min_id or comments returned
@@ -124,7 +122,7 @@ class MediaEndpointsMixin:
 
         return sorted(comments, key=lambda k: k['created_at_utc'], reverse=reverse)
 
-    def comment_replies(self, media_id, comment_id, **kwargs):
+    async def comment_replies(self, media_id, comment_id, **kwargs):
         """
         Get comment replies. Fixed at 20 replies returned per page.
         Check for 'has_more_tail_child_comments', 'next_max_child_cursor' to determine
@@ -137,7 +135,7 @@ class MediaEndpointsMixin:
         :return:
         """
         endpoint = f'media/{media_id}/comments/{comment_id}/child_comments/'
-        res = self._call_api(endpoint, query=kwargs)
+        res = await self._call_api(endpoint, query=kwargs)
 
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
@@ -145,7 +143,7 @@ class MediaEndpointsMixin:
             ClientCompatPatch.comment(res.get('parent_comment'))
         return res
 
-    def comment_inline_replies(self, media_id, comment_id, max_id, **kwargs):
+    async def comment_inline_replies(self, media_id, comment_id, max_id, **kwargs):
         """
         Get inline comment replies.
         Check for 'next_max_child_cursor' from ``media_comments()``
@@ -160,14 +158,14 @@ class MediaEndpointsMixin:
         query = {'max_id': max_id}
         if kwargs:
             query.update(kwargs)
-        res = self._call_api(endpoint, query=query)
+        res = await self._call_api(endpoint, query=query)
         if self.auto_patch:
             [ClientCompatPatch.comment(c, drop_incompat_keys=self.drop_incompat_keys)
              for c in res.get('child_comments', [])]
             ClientCompatPatch.comment(res.get('parent_comment'))
         return res
 
-    def edit_media(self, media_id, caption, usertags=None):
+    async def edit_media(self, media_id, caption, usertags=None):
         """
         Edit a media's caption
 
@@ -190,12 +188,12 @@ class MediaEndpointsMixin:
         if usertags:
             utags = {'in': [{'user_id': u['user_id'], 'position': u['position']} for u in usertags]}
             params['usertags'] = jdumps(utags)
-        res = self._call_api(endpoint, params=params)
+        res = await self._call_api(endpoint, params=params)
         if self.auto_patch:
             ClientCompatPatch.media(res.get('media'))
         return res
 
-    def delete_media(self, media_id):
+    async def delete_media(self, media_id):
         """
         Delete a media
 
@@ -208,9 +206,9 @@ class MediaEndpointsMixin:
         endpoint = f'media/{media_id}/delete/'
         params = {'media_id': media_id}
         params.update(self.authenticated_params)
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)
 
-    def post_comment(self, media_id, comment_text):
+    async def post_comment(self, media_id, comment_text):
         """
         Post a comment.
         Comment text validation according to https://www.instagram.com/developer/endpoints/comments/#post_media_comments
@@ -253,7 +251,6 @@ class MediaEndpointsMixin:
         if len(re.findall(r'\bhttps?://\S+\.\S+', comment_text)) > 1:
             raise ValueError('The comment cannot contain more than 1 URL.')
 
-        endpoint = f'media/{media_id}/comment/'
         params = {
             'comment_text': comment_text,
             'user_breadcrumb': gen_user_breadcrumb(len(comment_text)),
@@ -262,12 +259,12 @@ class MediaEndpointsMixin:
             'radio_type': self.radio_type,
         }
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = await self._call_api(f'media/{media_id}/comment/', params=params)
         if self.auto_patch:
             ClientCompatPatch.comment(res['comment'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def delete_comment(self, media_id, comment_id):
+    async def delete_comment(self, media_id, comment_id):
         """
         Delete a comment
 
@@ -281,10 +278,9 @@ class MediaEndpointsMixin:
         endpoint = f'media/{media_id}/comment/{comment_id}/delete/'
         params = {}
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
-        return res
+        return await self._call_api(endpoint, params=params)
 
-    def bulk_delete_comments(self, media_id, comment_ids):
+    async def bulk_delete_comments(self, media_id, comment_ids):
         """
         Bulk delete comment
 
@@ -297,16 +293,14 @@ class MediaEndpointsMixin:
         """
         if not isinstance(comment_ids, list):
             comment_ids = [comment_ids]
-        endpoint = f'media/{media_id}/comment/bulk_delete/'
         params = {
             'comment_ids_to_delete': ','.join(
                 [str(comment_id) for comment_id in comment_ids])
         }
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
-        return res
+        return await self._call_api(f'media/{media_id}/comment/bulk_delete/', params=params)
 
-    def media_likers(self, media_id, **kwargs):
+    async def media_likers(self, media_id, **kwargs):
         """
         Get users who have liked a post
 
@@ -314,13 +308,13 @@ class MediaEndpointsMixin:
         :return:
         """
         endpoint = f'media/{media_id}/likers/'
-        res = self._call_api(endpoint, query=kwargs)
+        res = await self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
         return res
 
-    def media_likers_chrono(self, media_id):
+    async def media_likers_chrono(self, media_id):
         """
         EXPERIMENTAL ENDPOINT, INADVISABLE TO USE.
         Get users who have liked a post in chronological order
@@ -329,13 +323,13 @@ class MediaEndpointsMixin:
         :return:
         """
         warnings.warn('This endpoint is experimental. Do not use.', ClientExperimentalWarning)
-        res = self._call_api(f'media/{media_id}/likers_chrono/')
+        res = await self._call_api(f'media/{media_id}/likers_chrono/')
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
         return res
 
-    def post_like(self, media_id, module_name='feed_timeline'):
+    async def post_like(self, media_id, module_name='feed_timeline'):
         """
         Like a post
 
@@ -354,10 +348,10 @@ class MediaEndpointsMixin:
         }
         params.update(self.authenticated_params)
         # d query param = flag for double tap
-        res = self._call_api(endpoint, params=params, query={'d': '1'})
+        res = await self._call_api(endpoint, params=params, query={'d': '1'})
         return res
 
-    def delete_like(self, media_id, module_name='feed_timeline'):
+    async def delete_like(self, media_id, module_name='feed_timeline'):
         """
         Unlike a post
 
@@ -375,10 +369,10 @@ class MediaEndpointsMixin:
             'radio_type': self.radio_type,
         }
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = await self._call_api(endpoint, params=params)
         return res
 
-    def media_seen(self, reels):
+    async def media_seen(self, reels):
         """
         Mark multiple stories as seen
 
@@ -414,10 +408,9 @@ class MediaEndpointsMixin:
         else:
             params = {'reels': reels}
         params.update(self.authenticated_params)
-        res = self._call_api('media/seen/', params=params, version='v2')
-        return res
+        return await self._call_api('media/seen/', params=params, version='v2')
 
-    def comment_like(self, comment_id):
+    async def comment_like(self, comment_id):
         """
         Like a comment
 
@@ -430,9 +423,9 @@ class MediaEndpointsMixin:
         """
         endpoint = f'media/{comment_id}/comment_like/'
         params = self.authenticated_params
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)
 
-    def comment_likers(self, comment_id):
+    async def comment_likers(self, comment_id):
         """
         Get users who have liked a comment
 
@@ -440,13 +433,13 @@ class MediaEndpointsMixin:
         :return:
         """
         endpoint = f'media/{comment_id}/comment_likers/'
-        res = self._call_api(endpoint)
+        res = await self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
         return res
 
-    def comment_unlike(self, comment_id):
+    async def comment_unlike(self, comment_id):
         """
         Unlike a comment
 
@@ -458,9 +451,9 @@ class MediaEndpointsMixin:
         """
         endpoint = f'media/{comment_id}/comment_unlike/'
         params = self.authenticated_params
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)
 
-    def save_photo(self, media_id, added_collection_ids=None):
+    async def save_photo(self, media_id, added_collection_ids=None):
         """
         Save a photo
 
@@ -478,9 +471,9 @@ class MediaEndpointsMixin:
                 added_collection_ids = [added_collection_ids]
             params['added_collection_ids'] = jdumps(added_collection_ids)
         params.update(self.authenticated_params)
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)
 
-    def unsave_photo(self, media_id, removed_collection_ids=None):
+    async def unsave_photo(self, media_id, removed_collection_ids=None):
         """
         Unsave a photo
 
@@ -498,9 +491,9 @@ class MediaEndpointsMixin:
                 removed_collection_ids = [removed_collection_ids]
             params['removed_collection_ids'] = jdumps(removed_collection_ids)
         params.update(self.authenticated_params)
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)
 
-    def disable_comments(self, media_id):
+    async def disable_comments(self, media_id):
         """
         Disable comments for a media
 
@@ -515,10 +508,9 @@ class MediaEndpointsMixin:
             '_csrftoken': self.csrftoken,
             '_uuid': self.uuid,
         }
-        res = self._call_api(endpoint, params=params, unsigned=True)
-        return res
+        return await self._call_api(endpoint, params=params, unsigned=True)
 
-    def enable_comments(self, media_id):
+    async def enable_comments(self, media_id):
         """
         Enable comments for a media
 
@@ -534,10 +526,9 @@ class MediaEndpointsMixin:
             '_csrftoken': self.csrftoken,
             '_uuid': self.uuid,
         }
-        res = self._call_api(endpoint, params=params, unsigned=True)
-        return res
+        return await self._call_api(endpoint, params=params, unsigned=True)
 
-    def media_only_me(self, media_id, media_type, undo=False):
+    async def media_only_me(self, media_id, media_type, undo=False):
         """
         Archive/unarchive a media so that it is only viewable by the owner.
 
@@ -556,19 +547,18 @@ class MediaEndpointsMixin:
         endpoint = f"media/{media_id}/{'only_me' if not undo else 'undo_only_me'}/"
         params = {'media_id': media_id}
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params, query={'media_type': media_type})
-        return res
+        return await self._call_api(endpoint, params=params, query={'media_type': media_type})
 
-    def media_undo_only_me(self, media_id, media_type):
+    async def media_undo_only_me(self, media_id, media_type):
         """
         Undo making a media only me.
 
         :param media_id:
         :param media_type: One of :attr:`MediaTypes.PHOTO`, :attr:`MediaTypes.VIDEO`, or :attr:`MediaTypes.CAROUSEL`
         """
-        return self.media_only_me(media_id, media_type, undo=True)
+        return await self.media_only_me(media_id, media_type, undo=True)
 
-    def story_viewers(self, story_pk, **kwargs):
+    async def story_viewers(self, story_pk, **kwargs):
         """
         Get list of story viewers
 
@@ -578,4 +568,4 @@ class MediaEndpointsMixin:
         :return:
         """
         endpoint = f'media/{story_pk}/list_reel_media_viewer/'
-        return self._call_api(endpoint, query=kwargs)
+        return await self._call_api(endpoint, query=kwargs)

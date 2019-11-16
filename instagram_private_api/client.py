@@ -12,24 +12,20 @@ import uuid
 import re
 import time
 import random
-from datetime import datetime
-import gzip
-from io import BytesIO
 import warnings
-from socket import timeout, error as SocketError
-from ssl import SSLError
-from .compat import (
-    compat_urllib_parse, compat_urllib_error,
-    compat_urllib_request, compat_urllib_parse_urlparse,
-    compat_http_client, jdumps, jloads)
-from .errors import (
-    ErrorHandler, ClientError,
-    ClientLoginRequiredError, ClientCookieExpiredError,
-    ClientConnectionError
-)
 
+from asyncio import run
+from datetime import datetime
+from os.path import isfile
+from ssl import create_default_context
+from .errors import ErrorHandler, ClientError, ClientLoginRequiredError
+
+from aiohttp import ClientSession, CookieJar, TCPConnector, ClientResponseError
+from aiohttp.hdrs import ACCEPT_LANGUAGE, CONNECTION, USER_AGENT
+from aiohttp.multidict import CIMultiDict
+
+from .compat import jdumps, jloads
 from .constants import Constants
-from .http import ClientCookieJar
 from .endpoints import (
     AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     FriendshipsEndpointsMixin, LiveEndpointsMixin, MediaEndpointsMixin,
@@ -64,7 +60,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     SIG_KEY_VERSION = Constants.SIG_KEY_VERSION
     APPLICATION_ID = Constants.APPLICATION_ID
 
-    def __init__(self, username, password, **kwargs):
+    def __init__(self, username, password, cookiejar=None, **kwargs):
         """
 
         :param username: Login username
@@ -72,15 +68,13 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :param kwargs: See below
 
         :Keyword Arguments:
+            - **cookiejar**: Path of pickled cookiejar
             - **auto_patch**: Patch the api objects to match the public API. Default: False
             - **drop_incompat_key**: Remove api object keys that is not in the public API. Default: False
             - **timeout**: Timeout interval in seconds. Default: 15
             - **api_url**: Override the default api url base
-            - **cookie**: Saved cookie string from a previous session
             - **settings**: A dict of settings from a previous session
             - **on_login**: Callback after successful login
-            - **proxy**: Specify a proxy ex: 'http://127.0.0.1:8888' (ALPHA)
-            - **proxy_handler**: Specify your own proxy handler
         :return:
         """
         self.username = username
@@ -91,6 +85,12 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         self.timeout = kwargs.pop('timeout', 15)
         self.on_login = kwargs.pop('on_login', None)
         self.logger = logger
+
+        if cookiejar and isfile(cookiejar):
+            cookies = CookieJar()
+            cookies.load(cookiejar)
+        else:
+            cookies = None
 
         user_settings = kwargs.pop('settings', None) or {}
         self.uuid = (
@@ -152,42 +152,16 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 kwargs.pop('version_code', None) or user_settings.get('version_code') or
                 Constants.VERSION_CODE)
 
-        cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
-        cookie_jar = ClientCookieJar(cookie_string=cookie_string)
-        if cookie_string and cookie_jar.auth_expires and int(time.time()) >= cookie_jar.auth_expires:
-            raise ClientCookieExpiredError(f'Cookie expired at {cookie_jar.auth_expires}')
-        cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
-
-        proxy_handler = kwargs.pop('proxy_handler', None)
-        if not proxy_handler:
-            proxy = kwargs.pop('proxy', None)
-            if proxy:
-                warnings.warn('Proxy support is alpha.', UserWarning)
-                parsed_url = compat_urllib_parse_urlparse(proxy)
-                if parsed_url.netloc and parsed_url.scheme:
-                    proxy_address = f'{parsed_url.scheme}://{parsed_url.netloc}'
-                    proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
-                else:
-                    raise ValueError(f'Invalid proxy argument: {proxy}')
-        handlers = []
-        if proxy_handler:
-            handlers.append(proxy_handler)
-
-        # Allow user to override custom ssl context where possible
-        custom_ssl_context = kwargs.pop('custom_ssl_context', None)
-        try:
-            https_handler = compat_urllib_request.HTTPSHandler(context=custom_ssl_context)
-        except TypeError:
-            # py version < 2.7.9
-            https_handler = compat_urllib_request.HTTPSHandler()
-
-        handlers.extend([
-            compat_urllib_request.HTTPHandler(),
-            https_handler,
-            cookie_handler])
-        opener = compat_urllib_request.build_opener(*handlers)
-        opener.cookie_jar = cookie_jar
-        self.opener = opener
+        context = create_default_context()
+        # set_ciphers cannot add or remove TLS 1.3 ciphers, but they will still be preferred if available
+        # these are the ciphers supported by Liger in Instagram 107 when TLS 1.3 is disabled
+        context.set_ciphers(
+            'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:'
+            'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:'
+            'ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:AES128-GCM-SHA256:AES256-SHA:AES128-SHA')
+        self.session = ClientSession(connector=TCPConnector(ssl=context, limit=Constants.MAX_CONNECTIONS),
+                                     headers=self.default_headers, raise_for_status=True,
+                                     trust_env=True, cookie_jar=cookies, conn_timeout=self.timeout)
 
         # ad_id must be initialised after cookie_jar/opener because
         # it relies on self.authenticated_user_name
@@ -195,10 +169,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             kwargs.pop('ad_id', None) or user_settings.get('ad_id') or
             self.generate_adid())
 
-        if not cookie_string:   # [TODO] There's probably a better way than to depend on cookie_string
+        if not cookies:
             if not self.username or not self.password:
                 raise ClientLoginRequiredError('login_required', code=400)
-            self.login()
+            run(self.login())
 
         self.logger.debug(f'USERAGENT: {self.user_agent}')
         super().__init__()
@@ -306,29 +280,11 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'parsed_params': parse_params
         }
 
-    def get_cookie_value(self, key, domain=''):
-        now = int(time.time())
-        eternity = now + 100 * 365 * 24 * 60 * 60   # future date for non-expiring cookies
-        if not domain:
-            domain = compat_urllib_parse_urlparse(self.API_URL).netloc
-
-        for cookie in sorted(
-                self.cookie_jar, key=lambda c: c.expires or eternity, reverse=True):
-            # don't return expired cookie
-            if cookie.expires and cookie.expires < now:
-                continue
-            # cookie domain may be i.instagram.com or .instagram.com
-            cookie_domain = cookie.domain
-            # simple domain matching
-            if cookie_domain.startswith('.'):
-                cookie_domain = cookie_domain[1:]
-            if not domain.endswith(cookie_domain):
-                continue
-
-            if cookie.name.lower() == key.lower():
-                return cookie.value
-
-        return None
+    def get_cookie_value(self, key, domain='.instagram.com'):
+        try:
+            return self.session.cookie_jar.filter_cookies(domain)[key].value
+        except KeyError:
+            return None
 
     @property
     def csrftoken(self):
@@ -381,21 +337,19 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
     @property
     def default_headers(self):
-        return {
-            'User-Agent': self.user_agent,
-            'Connection': 'close',
-            'Accept': '*/*',
-            'Accept-Language': 'en-US',
-            'Accept-Encoding': 'gzip, deflate',
-            'X-IG-Capabilities': self.ig_capabilities,
-            'X-IG-Connection-Type': 'WIFI',
+        return CIMultiDict({
+            USER_AGENT: self.user_agent,
+            ACCEPT_LANGUAGE: 'en-US',
+            'X-FB-HTTP-Engine': Constants.FB_HTTP_ENGINE,
+            CONNECTION: 'keep-alive',
             'X-IG-Connection-Speed': f'{random.randint(1000, 5000)}kbps',
-            'X-IG-App-ID': self.application_id,
             'X-IG-Bandwidth-Speed-KBPS': '-1.000',
             'X-IG-Bandwidth-TotalBytes-B': '0',
             'X-IG-Bandwidth-TotalTime-MS': '0',
-            'X-FB-HTTP-Engine': Constants.FB_HTTP_ENGINE,
-        }
+            'X-IG-Connection-Type': 'WIFI',
+            'X-IG-Capabilities': self.ig_capabilities,
+            'X-IG-App-ID': self.application_id,
+        })
 
     @property
     def radio_type(self):
@@ -457,22 +411,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             modified_seed = sha2.hexdigest()
         return self.generate_uuid(False, modified_seed)
 
-    @staticmethod
-    def _read_response(response):
-        """
-        Extract the response body from a http response.
-
-        :param response:
-        :return:
-        """
-        if response.info().get('Content-Encoding') == 'gzip':
-            buf = BytesIO(response.read())
-            res = gzip.GzipFile(fileobj=buf).read().decode('utf8')
-        else:
-            res = response.read().decode('utf8')
-        return res
-
-    def _call_api(self, endpoint, params=None, query=None, return_response=False, unsigned=False, version='v1'):
+    async def _call_api(self, endpoint, params=None, query=None, return_response=False, unsigned=False, version='v1'):
         """
         Calls the private api.
 
@@ -485,60 +424,44 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :return:
         """
         url = self.api_url.format(version=version) + endpoint
-        if query:
-            url += ('?' if '?' not in endpoint else '&') + compat_urllib_parse.urlencode(query)
 
-        headers = self.default_headers
-        data = None
-        if params or params == '':
-            headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-            if params == '':    # force post if empty string
-                data = b''
-            else:
-                if not unsigned:
-                    json_params = jdumps(params)
-                    hash_sig = self._generate_signature(json_params)
-                    post_params = {
-                        'ig_sig_key_version': self.key_version,
-                        'signed_body': hash_sig + '.' + json_params
-                    }
-                else:
-                    # direct form post
-                    post_params = params
-                data = compat_urllib_parse.urlencode(post_params).encode('ascii')
+        if params:
+            method = self.session.post
+            if params is True:
+                params = None
+            elif not unsigned:
+                json_params = jdumps(params)
+                params = query if query else {}
+                params['ig_sig_key_version'] = self.key_version
+                params['signed_body'] = f'{self._generate_signature(json_params)}.{json_params}'
+        else:
+            method = self.session.get
+            params = query
 
-        req = compat_urllib_request.Request(url, data, headers=headers)
-        try:
-            self.logger.debug(f'REQUEST: {url} {req.get_method()}')
-            self.logger.debug(f'DATA: {data}')
-            response = self.opener.open(req, timeout=self.timeout)
-        except compat_urllib_error.HTTPError as e:
-            error_response = self._read_response(e)
-            self.logger.debug(f'RESPONSE: {e.code} {error_response}')
-            ErrorHandler.process(e, error_response)
-
-        except (SSLError, timeout, SocketError,
-                compat_urllib_error.URLError,   # URLError is base of HTTPError
-                compat_http_client.HTTPException,
-                ConnectionError) as connection_error:
-            raise ClientConnectionError(f'{connection_error.__class__.__name__} {connection_error}')
+        async with method(url, params=params) as response:
+            try:
+                self.logger.debug(f'REQUEST: {url}')
+                self.logger.debug(f'DATA: {params}')
+                if return_response:
+                    return await response.text()
+                response = await response.json(loads=jloads)
+            except ClientResponseError as e:
+                self.logger.debug(f'RESPONSE: {e.code} {response}')
+                ErrorHandler.process(e, response)
 
         if return_response:
             return response
 
-        response_content = self._read_response(response)
-        self.logger.debug(f'RESPONSE: {response.code} {response_content}')
-        json_response = jloads(response_content)
+        self.logger.debug(f'RESPONSE: {response}')
 
-        if json_response.get('message', '') == 'login_required':
+        if response.get('message', '') == 'login_required':
             raise ClientLoginRequiredError(
-                json_response.get('message'), code=response.code,
-                error_response=jdumps(json_response))
+                response.get('message'), error_response=jdumps(response))
 
         # not from oembed or an ok response
-        if not json_response.get('provider_url') and json_response.get('status', '') != 'ok':
+        if not response.get('provider_url') and response.get('status', '') != 'ok':
             raise ClientError(
-                json_response.get('message', 'Unknown error'), code=response.code,
-                error_response=jdumps(json_response))
+                response.get('message', 'Unknown error'),
+                error_response=jdumps(response))
 
-        return json_response
+        return response

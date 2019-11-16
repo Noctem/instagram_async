@@ -5,10 +5,10 @@ from ..compatpatch import ClientCompatPatch
 class CollectionsEndpointsMixin:
     """For endpoints in related to collections functionality."""
 
-    def list_collections(self):
-        return self._call_api('collections/list/')
+    async def list_collections(self):
+        return await self._call_api('collections/list/')
 
-    def collection_feed(self, collection_id, **kwargs):
+    async def collection_feed(self, collection_id, **kwargs):
         """
         Get the items in a collection.
 
@@ -16,13 +16,13 @@ class CollectionsEndpointsMixin:
         :return:
         """
         endpoint = f'feed/collection/{collection_id}/'
-        res = self._call_api(endpoint, query=kwargs)
+        res = await self._call_api(endpoint, query=kwargs)
         if self.auto_patch and res.get('items'):
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', []) if m.get('media')]
         return res
 
-    def create_collection(self, name, added_media_ids=None):
+    async def create_collection(self, name, added_media_ids=None):
         """
         Create a new collection.
 
@@ -59,9 +59,9 @@ class CollectionsEndpointsMixin:
         if added_media_ids:
             params['added_media_ids'] = jdumps(added_media_ids)
         params.update(self.authenticated_params)
-        return self._call_api('collections/create/', params=params)
+        return await self._call_api('collections/create/', params=params)
 
-    def edit_collection(self, collection_id, added_media_ids):
+    async def edit_collection(self, collection_id, added_media_ids):
         """
         Add media IDs to an existing collection.
 
@@ -76,9 +76,9 @@ class CollectionsEndpointsMixin:
         }
         params.update(self.authenticated_params)
         endpoint = f'collections/{collection_id}/edit/'
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)
 
-    def delete_collection(self, collection_id):
+    async def delete_collection(self, collection_id):
         """
         Delete a collection.
 
@@ -92,4 +92,4 @@ class CollectionsEndpointsMixin:
         """
         params = self.authenticated_params
         endpoint = f'collections/{collection_id}/delete/'
-        return self._call_api(endpoint, params=params)
+        return await self._call_api(endpoint, params=params)

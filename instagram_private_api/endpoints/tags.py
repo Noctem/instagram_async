@@ -1,37 +1,33 @@
 from ..compat import jdumps
-from ..utils import raise_if_invalid_rank_token
 from ..compatpatch import ClientCompatPatch
+from ..utils import raise_if_invalid_rank_token
 
 
 class TagsEndpointsMixin:
     """For endpoints in ``/tags/``."""
 
-    def tag_info(self, tag):
+    async def tag_info(self, tag):
         """
         Get tag info
 
         :param tag:
         :return:
         """
-        endpoint = f'tags/{tag}/info/'
-        res = self._call_api(endpoint)
-        return res
+        return await self._call_api(f'tags/{tag}/info/')
 
-    def tag_related(self, tag, **kwargs):
+    async def tag_related(self, tag, **kwargs):
         """
         Get related tags
 
         :param tag:
         :return:
         """
-        endpoint = f'tags/{tag}/related/'
         query = {
             'visited': jdumps([{'id': tag, 'type': 'hashtag'}]),
             'related_types': '["hashtag","location"]'}
-        res = self._call_api(endpoint, query=query)
-        return res
+        return await self._call_api(f'tags/{tag}/related/', query=query)
 
-    def tag_search(self, text, rank_token, exclude_list=[], **kwargs):
+    async def tag_search(self, text, rank_token, exclude_list=[], **kwargs):
         """
         Search tag
 
@@ -53,44 +49,40 @@ class TagsEndpointsMixin:
             'rank_token': rank_token,
         }
         query.update(kwargs)
-        res = self._call_api('tags/search/', query=query)
-        return res
+        return await self._call_api('tags/search/', query=query)
 
-    def tags_user_following(self, user_id):
+    async def tags_user_following(self, user_id):
         """
         Get tags a user is following
 
         :param user_id:
         :return:
         """
-        endpoint = f'users/{user_id}/following_tags_info/'
-        return self._call_api(endpoint)
+        return await self._call_api(f'users/{user_id}/following_tags_info/')
 
-    def tag_follow_suggestions(self):
+    async def tag_follow_suggestions(self):
         """Get suggestions for tags to follow"""
-        return self._call_api('tags/suggested/')
+        return await self._call_api('tags/suggested/')
 
-    def tag_follow(self, tag):
+    async def tag_follow(self, tag):
         """
         Follow a tag
 
         :param tag:
         :return:
         """
-        endpoint = f'tags/follow/{tag}/'
-        return self._call_api(endpoint, params=self.authenticated_params)
+        return await self._call_api(f'tags/follow/{tag}/', params=self.authenticated_params)
 
-    def tag_unfollow(self, tag):
+    async def tag_unfollow(self, tag):
         """
         Unfollow a tag
 
         :param tag:
         :return:
         """
-        endpoint = f'tags/unfollow/{tag}/'
-        return self._call_api(endpoint, params=self.authenticated_params)
+        return await self._call_api(f'tags/unfollow/{tag}/', params=self.authenticated_params)
 
-    def tag_section(self, tag, tab='top', **kwargs):
+    async def tag_section(self, tag, tab='top', **kwargs):
         """
         Get a tag feed section
 
@@ -103,13 +95,11 @@ class TagsEndpointsMixin:
             **max_id**: for pagination
         :return:
         """
-        valid_tabs = ['top', 'recent', 'places']
+        valid_tabs = ('top', 'recent', 'places')
         if tab not in valid_tabs:
             raise ValueError(f'Invalid tab: {tab}')
 
         extract_media_only = kwargs.pop('extract', False)
-        endpoint = f'tags/{tag}/sections/'
-
         params = {
             'supported_tabs': jdumps(valid_tabs),
             'tab': tab,
@@ -128,7 +118,7 @@ class TagsEndpointsMixin:
         kwargs.pop('next_media_ids', None)
 
         params.update(kwargs)
-        results = self._call_api(endpoint, params=params, unsigned=True)
+        results = self._call_api(f'tags/{tag}/sections/', params=params, unsigned=True)
         extracted_medias = []
         if self.auto_patch:
             for s in results.get('sections', []):

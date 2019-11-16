@@ -142,7 +142,6 @@ if __name__ == '__main__':
 
     def match_regex(test_name):
         for test_re in args.tests:
-            test_re = f'{test_re}'
             if re.match(test_re, test_name):
                 return True
         return False

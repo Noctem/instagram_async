@@ -1,7 +1,6 @@
-import time
-import warnings
-
-from random import randint
+from random import uniform
+from time import time
+from warnings import warn
 
 from .common import ClientDeprecationWarning
 from ..compat import jdumps
@@ -79,7 +78,7 @@ class UploadEndpointsMixin:
 
         :return: tuple of (min. ratio, max. ratio)
         """
-        warnings.warn(
+        warn(
             'Client.standard_ratios() is deprecated. '
             'Please use MediaRatios.standard instead.',
             ClientDeprecationWarning
@@ -94,7 +93,7 @@ class UploadEndpointsMixin:
 
         :return: tuple of (min. ratio, max. ratio)
         """
-        warnings.warn(
+        warn(
             'Client.reel_ratios() is deprecated. '
             'Please use MediaRatios.reel instead.',
             ClientDeprecationWarning
@@ -127,8 +126,8 @@ class UploadEndpointsMixin:
         this_ratio = 1.0 * width / height
         return min_ratio <= this_ratio <= max_ratio
 
-    def configure(self, upload_id, size, caption='', location=None,
-                  disable_comments=False, is_sidecar=False):
+    async def configure(self, upload_id, size, caption='', location=None,
+                        disable_comments=False, is_sidecar=False):
         """
         Finalises a photo upload. This should not be called directly.
         Use :meth:`post_photo` instead.
@@ -186,13 +185,13 @@ class UploadEndpointsMixin:
             return params
 
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = await self._call_api(endpoint, params=params)
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def configure_video(self, upload_id, size, duration, thumbnail_data, caption='',
-                        location=None, disable_comments=False, is_sidecar=False):
+    async def configure_video(self, upload_id, size, duration, thumbnail_data, caption='',
+                              location=None, disable_comments=False, is_sidecar=False):
         """
         Finalises a video upload. This should not be called directly.
         Use :meth:`post_video` instead.
@@ -259,12 +258,12 @@ class UploadEndpointsMixin:
             return params
 
         params.update(self.authenticated_params)
-        res = self._call_api('media/configure/', params=params, query={'video': 1})
+        res = await self._call_api('media/configure/', params=params, query={'video': 1})
         if res.get('media') and self.auto_patch:
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def configure_to_reel(self, upload_id, size):
+    async def configure_to_reel(self, upload_id, size):
         """
         Finalises a photo story upload. This should not be called directly.
         Use :meth:`post_photo_story` instead.
@@ -281,9 +280,9 @@ class UploadEndpointsMixin:
         params = {
             'source_type': '4',
             'upload_id': upload_id,
-            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
-            'client_shared_at': str(int(time.time()) - randint(3, 10)),
-            'client_timestamp': str(int(time.time())),
+            'story_media_creation_date': int(time() - uniform(11.0, 20.0)),
+            'client_shared_at': int(time() - uniform(3.0, 10.0)),
+            'client_timestamp': int(time()),
             'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'device': {
                 'manufacturer': self.phone_manufacturer,
@@ -302,12 +301,12 @@ class UploadEndpointsMixin:
             }
         }
         params.update(self.authenticated_params)
-        res = self._call_api(endpoint, params=params)
+        res = await self._call_api(endpoint, params=params)
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def configure_video_to_reel(self, upload_id, size, duration, thumbnail_data):
+    async def configure_video_to_reel(self, upload_id, size, duration, thumbnail_data):
         """
         Finalises a video story upload. This should not be called directly.
         Use :meth:`post_video_story` instead.
@@ -327,9 +326,9 @@ class UploadEndpointsMixin:
         params = {
             'source_type': '4',
             'upload_id': upload_id,
-            'story_media_creation_date': str(int(time.time()) - randint(11, 20)),
-            'client_shared_at': str(int(time.time()) - randint(3, 10)),
-            'client_timestamp': str(int(time.time())),
+            'story_media_creation_date': int(time() - uniform(11.0, 20.0)),
+            'client_shared_at': int(time() - uniform(3.0, 10.0)),
+            'client_timestamp': int(time()),
             'configure_mode': 1,      # 1 - REEL_SHARE, 2 - DIRECT_STORY_SHARE
             'poster_frame_index': 0,
             'length': duration * 1.0,
@@ -354,12 +353,12 @@ class UploadEndpointsMixin:
         }
 
         params.update(self.authenticated_params)
-        res = self._call_api('media/configure_to_story/', params=params, query={'video': '1'})
+        res = await self._call_api('media/configure_to_story/', params=params, query={'video': '1'})
         if self.auto_patch and res.get('media'):
             ClientCompatPatch.media(res.get('media'), drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False, **kwargs):
+    async def post_photo(self, photo_data, size, caption='', upload_id=None, to_reel=False, **kwargs):
         """
         Upload a photo.
 
@@ -378,7 +377,7 @@ class UploadEndpointsMixin:
         """
         raise NotImplementedError('Posting has not yet been implemented.')
 
-    def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False, **kwargs):
+    async def post_video(self, video_data, size, duration, thumbnail_data, caption='', to_reel=False, **kwargs):
         """
         Upload a video
 
@@ -399,7 +398,7 @@ class UploadEndpointsMixin:
         """
         raise NotImplementedError('Posting has not yet been implemented.')
 
-    def post_photo_story(self, photo_data, size):
+    async def post_photo_story(self, photo_data, size):
         """
         Upload a photo story
 
@@ -407,10 +406,10 @@ class UploadEndpointsMixin:
         :param size: tuple of (width, height)
         :return:
         """
-        return self.post_photo(
+        return await self.post_photo(
             photo_data=photo_data, size=size, to_reel=True)
 
-    def post_video_story(self, video_data, size, duration, thumbnail_data):
+    async def post_video_story(self, video_data, size, duration, thumbnail_data):
         """
         Upload a video story
 
@@ -420,11 +419,11 @@ class UploadEndpointsMixin:
         :param thumbnail_data: byte string of the video thumbnail content
         :return:
         """
-        return self.post_video(
+        return await self.post_video(
             video_data=video_data, size=size, duration=duration,
             thumbnail_data=thumbnail_data, to_reel=True)
 
-    def post_album(self, medias, caption='', location=None, **kwargs):
+    async def post_album(self, medias, caption='', location=None, **kwargs):
         """
         Post an album of up to 10 photos/videos.
 

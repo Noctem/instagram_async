@@ -8,7 +8,7 @@ from ..utils import raise_if_invalid_rank_token
 class FeedEndpointsMixin:
     """For endpoints in ``/feed/``."""
 
-    def feed_liked(self, **kwargs):
+    async def feed_liked(self, **kwargs):
         """
         Get liked feed
 
@@ -17,13 +17,13 @@ class FeedEndpointsMixin:
 
         :return:
         """
-        res = self._call_api('feed/liked/', query=kwargs)
+        res = await self._call_api('feed/liked/', query=kwargs)
         if self.auto_patch and res.get('items'):
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def feed_timeline(self, **kwargs):
+    async def feed_timeline(self, **kwargs):
         """
         Get timeline feed. To get a new timeline feed, you can mark a set of media
         as seen by setting seen_posts = comma-separated list of media IDs. Example:
@@ -41,14 +41,14 @@ class FeedEndpointsMixin:
             'timezone_offset': self.timezone_offset,
         }
         params.update(kwargs)
-        res = self._call_api('feed/timeline/', params=params, unsigned=True)
+        res = await self._call_api('feed/timeline/', params=params, unsigned=True)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media_or_ad'], drop_incompat_keys=self.drop_incompat_keys)
              if m.get('media_or_ad') else m
              for m in res.get('feed_items', [])]
         return res
 
-    def feed_popular(self, **kwargs):   # pragma: no cover
+    async def feed_popular(self, **kwargs):   # pragma: no cover
         """Get popular feed. This endpoint is believed to be obsolete. Do not use."""
         warnings.warn(
             'This endpoint is believed to be obsolete. Do not use.',
@@ -60,13 +60,13 @@ class FeedEndpointsMixin:
             'ranked_content': 'true'
         }
         query.update(kwargs)
-        res = self._call_api('feed/popular/', query=query)
+        res = await self._call_api('feed/popular/', query=query)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def user_feed(self, user_id, **kwargs):
+    async def user_feed(self, user_id, **kwargs):
         """
         Get the feed for the specified user id
 
@@ -76,19 +76,18 @@ class FeedEndpointsMixin:
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = f'feed/user/{user_id}/'
-        res = self._call_api(endpoint, query=kwargs)
+        res = await self._call_api(f'feed/user/{user_id}/', query=kwargs)
 
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def self_feed(self, **kwargs):
+    async def self_feed(self, **kwargs):
         """Get authenticated user's own feed"""
-        return self.user_feed(self.authenticated_user_id, **kwargs)
+        return await self.user_feed(self.authenticated_user_id, **kwargs)
 
-    def username_feed(self, user_name, **kwargs):
+    async def username_feed(self, user_name, **kwargs):
         """
         Get the feed for the specified user name
 
@@ -98,16 +97,15 @@ class FeedEndpointsMixin:
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = f'feed/user/{user_name}/username/'
-        res = self._call_api(endpoint, query=kwargs)
+        res = await self._call_api(f'feed/user/{user_name}/username/', query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def reels_tray(self, **kwargs):
+    async def reels_tray(self, **kwargs):
         """Get story reels tray"""
-        res = self._call_api('feed/reels_tray/', query=kwargs)
+        res = await self._call_api('feed/reels_tray/', query=kwargs)
         if self.auto_patch:
             for u in res.get('tray', []):
                 if not u.get('items'):
@@ -116,7 +114,7 @@ class FeedEndpointsMixin:
                  for m in u.get('items', [])]
         return res
 
-    def user_reel_media(self, user_id, **kwargs):
+    async def user_reel_media(self, user_id, **kwargs):
         """
         Get user story/reel media
 
@@ -124,14 +122,13 @@ class FeedEndpointsMixin:
         :param kwargs:
         :return:
         """
-        endpoint = f'feed/user/{user_id}/reel_media/'
-        res = self._call_api(endpoint, query=kwargs)
+        res = await self._call_api(f'feed/user/{user_id}/reel_media/', query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]
         return res
 
-    def reels_media(self, user_ids, **kwargs):
+    async def reels_media(self, user_ids, **kwargs):
         """
         Get multiple users' reel/story media
 
@@ -143,7 +140,7 @@ class FeedEndpointsMixin:
         params = {'user_ids': user_ids}
         params.update(kwargs)
 
-        res = self._call_api('feed/reels_media/', params=params)
+        res = await self._call_api('feed/reels_media/', params=params)
         if self.auto_patch:
             for reel_media in res.get('reels_media', []):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -153,7 +150,7 @@ class FeedEndpointsMixin:
                  for m in reel.get('items', [])]
         return res
 
-    def feed_tag(self, tag, rank_token, **kwargs):
+    async def feed_tag(self, tag, rank_token, **kwargs):
         """
         Get tag feed
 
@@ -170,8 +167,7 @@ class FeedEndpointsMixin:
             'rank_token': rank_token
         }
         query_params.update(kwargs)
-        endpoint = f'feed/tag/{tag}/'
-        res = self._call_api(endpoint, query=query_params)
+        res = await self._call_api(f'feed/tag/tag/', query=query_params)
         if self.auto_patch:
             if res.get('items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -184,21 +180,20 @@ class FeedEndpointsMixin:
                  for m in res.get('story', {}).get('items', [])]
         return res
 
-    def user_story_feed(self, user_id):
+    async def user_story_feed(self, user_id):
         """
         Get a user's story feed and current/replay broadcasts (if available)
 
         :param user_id:
         :return:
         """
-        endpoint = f'feed/user/{user_id}/story/'
-        res = self._call_api(endpoint)
+        res = await self._call_api(f'feed/user/{user_id}/story/')
         if self.auto_patch and res.get('reel'):
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('reel', {}).get('items', [])]
         return res
 
-    def feed_location(self, location_id, rank_token, **kwargs):
+    async def feed_location(self, location_id, rank_token, **kwargs):
         """
         This endpoint is believed to be obsolete. Do not use. Replaced by :meth:`location_section`.
 
@@ -215,12 +210,11 @@ class FeedEndpointsMixin:
 
         raise_if_invalid_rank_token(rank_token)
 
-        endpoint = f'feed/location/{location_id}/'
         query_params = {
             'rank_token': rank_token,
         }
         query_params.update(kwargs)
-        res = self._call_api(endpoint, query=query_params)
+        res = await self._call_api(f'feed/location/{location_id}/', query=query_params)
         if self.auto_patch:
             if res.get('items'):
                 [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -233,7 +227,7 @@ class FeedEndpointsMixin:
                  for m in res.get('story', {}).get('items', [])]
         return res
 
-    def saved_feed(self, **kwargs):
+    async def saved_feed(self, **kwargs):
         """
         Get saved photo feed
 
@@ -241,19 +235,19 @@ class FeedEndpointsMixin:
             - **count**: Limit the number of items returned
         :return:
         """
-        res = self._call_api('feed/saved/', query=kwargs)
+        res = await self._call_api('feed/saved/', query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', []) if m.get('media')]
         return res
 
-    def feed_only_me(self, **kwargs):
+    async def feed_only_me(self, **kwargs):
         """
         Get feed of archived media
 
         :param kwargs
         """
-        res = self._call_api('feed/only_me_feed/', query=kwargs)
+        res = await self._call_api('feed/only_me_feed/', query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
              for m in res.get('items', [])]

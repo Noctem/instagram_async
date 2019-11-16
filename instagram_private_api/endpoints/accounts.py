@@ -6,13 +6,12 @@ from ..compatpatch import ClientCompatPatch
 class AccountsEndpointsMixin:
     """For endpoints in ``/accounts/``."""
 
-    def login(self):
+    async def login(self):
         """Login."""
 
-        prelogin_params = self._call_api(
+        prelogin_params = await self._call_api(
             'si/fetch_headers/',
-            params='',
-            query={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
+            params={'challenge_type': 'signup', 'guid': self.generate_uuid(True)},
             return_response=True)
 
         if not self.csrftoken:
@@ -37,9 +36,9 @@ class AccountsEndpointsMixin:
         if not self.csrftoken:
             raise ClientError(
                 'Unable to get csrf from login.',
-                error_response=self._read_response(login_response))
+                error_response=login_response)
 
-        login_json = jloads(self._read_response(login_response))
+        login_json = jloads(login_response)
 
         if not login_json.get('logged_in_user', {}).get('pk'):
             raise ClientLoginError('Unable to login.')
@@ -58,15 +57,15 @@ class AccountsEndpointsMixin:
         # self.news_inbox()
         # self.explore()
 
-    def current_user(self):
+    async def current_user(self):
         """Get current user info"""
         params = self.authenticated_params
-        res = self._call_api('accounts/current_user/', params=params, query={'edit': 'true'})
+        res = await self._call_api('accounts/current_user/', params=params, query={'edit': 'true'})
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def edit_profile(self, first_name, biography, external_url, email, phone_number, gender):
+    async def edit_profile(self, first_name, biography, external_url, email, phone_number, gender):
         """
         Edit profile
 
@@ -93,20 +92,20 @@ class AccountsEndpointsMixin:
             'email': email,
         }
         params.update(self.authenticated_params)
-        res = self._call_api('accounts/edit_profile/', params=params)
+        res = await self._call_api('accounts/edit_profile/', params=params)
         if self.auto_patch:
             ClientCompatPatch.user(res.get('user'))
         return res
 
-    def remove_profile_picture(self):
+    async def remove_profile_picture(self):
         """Remove profile picture"""
-        res = self._call_api(
+        res = await self._call_api(
             'accounts/remove_profile_picture/', params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def change_profile_picture(self, photo_data):
+    async def change_profile_picture(self, photo_data):
         """
         Change profile picture
 
@@ -115,21 +114,21 @@ class AccountsEndpointsMixin:
         """
         raise NotImplementedError("Changing profile pictures is not supported yet.")
 
-    def set_account_private(self):
+    async def set_account_private(self):
         """Make account private"""
-        res = self._call_api('accounts/set_private/', params=self.authenticated_params)
+        res = await self._call_api('accounts/set_private/', params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.list_user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def set_account_public(self):
+    async def set_account_public(self):
         """Make account public"""""
-        res = self._call_api('accounts/set_public/', params=self.authenticated_params)
+        res = await self._call_api('accounts/set_public/', params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.list_user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
 
-    def logout(self):
+    async def logout(self):
         """Logout user"""
         params = {
             'phone_id': self.phone_id,
@@ -138,17 +137,17 @@ class AccountsEndpointsMixin:
             'device_id': self.device_id,
             '_uuid': self.uuid
         }
-        return self._call_api('accounts/logout/', params=params, unsigned=True)
+        return await self._call_api('accounts/logout/', params=params, unsigned=True)
 
-    def presence_status(self):
+    async def presence_status(self):
         """Get presence status setting"""
         query = {
             'ig_sig_key_version': self.key_version,
             'signed_body': self._generate_signature('{}') + '.{}'
         }
-        return self._call_api('accounts/get_presence_disabled/', query=query)
+        return await self._call_api('accounts/get_presence_disabled/', query=query)
 
-    def set_presence_status(self, disabled):
+    async def set_presence_status(self, disabled):
         """
         Set presence status setting
 
@@ -158,12 +157,12 @@ class AccountsEndpointsMixin:
             'disabled': '1' if disabled else '0'
         }
         params.update(self.authenticated_params)
-        return self._call_api('accounts/set_presence_disabled/', params=params)
+        return await self._call_api('accounts/set_presence_disabled/', params=params)
 
-    def enable_presence_status(self):
+    async def enable_presence_status(self):
         """Enable presence status setting"""
-        return self.set_presence_status(False)
+        return await self.set_presence_status(False)
 
-    def disable_presence_status(self):
+    async def disable_presence_status(self):
         """Disable presence status setting"""
-        return self.set_presence_status(True)
+        return await self.set_presence_status(True)

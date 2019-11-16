@@ -105,7 +105,7 @@ class ErrorHandler:
         """
         Tries to process an error meaningfully
 
-        :param http_error: an instance of compat_urllib_error.HTTPError
+        :param http_error: an instance of ClientResponseError
         :param error_response: body of the error response
         """
         error_msg = http_error.reason
@@ -116,7 +116,7 @@ class ErrorHandler:
                 error_response=error_response)
 
         try:
-            error_obj = jloads(error_response)
+            error_obj = error_response if isinstance(error_response, str) else jloads(error_response)
             error_message_type = error_obj.get('error_type', '') or error_obj.get('message', '')
             if http_error.code == ClientErrorCodes.TOO_MANY_REQUESTS:
                 raise ClientThrottledError(

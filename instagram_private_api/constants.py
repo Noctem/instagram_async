@@ -18,6 +18,8 @@ class Constants:
     PHONE_CHIPSET = 'samsungexynos8890'
     VERSION_CODE = '138226743'
 
+    MAX_CONNECTIONS = 32
+
     USER_AGENT_FORMAT = \
         'Instagram {app_version} Android ({android_version}/{android_release}; ' \
         '{dpi}; {resolution}; {brand}; {device}; {model}; {chipset}; en_US; {version_code})'
