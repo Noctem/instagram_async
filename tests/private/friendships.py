@@ -165,7 +165,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_create(user_id)
         call_api.assert_called_with(
-            'friendships/create/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/create/{user_id}/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -182,7 +182,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_destroy(user_id)
         call_api.assert_called_with(
-            'friendships/destroy/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/destroy/{user_id}/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -199,7 +199,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_block(user_id)
         call_api.assert_called_with(
-            'friendships/block/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/block/{user_id}/',
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -210,7 +210,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.friendships_unblock(user_id)
         call_api.assert_called_with(
-            'friendships/unblock/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/unblock/{user_id}/',
             params=params)
 
     def test_blocked_reels(self):
@@ -226,7 +226,7 @@ class FriendshipTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.block_friend_reel(user_id)
         call_api.assert_called_with(
-            'friendships/block_friend_reel/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/block_friend_reel/{user_id}/',
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -235,7 +235,7 @@ class FriendshipTests(ApiTestBase):
         user_id = '2958144170'
         self.api.unblock_friend_reel(user_id)
         call_api.assert_called_with(
-            'friendships/unblock_friend_reel/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/unblock_friend_reel/{user_id}/',
             params=self.api.authenticated_params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -256,7 +256,7 @@ class FriendshipTests(ApiTestBase):
         user_id = '123456789'
         self.api.enable_post_notifications(user_id)
         call_api.assert_called_with(
-            'friendships/favorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/favorite/{user_id}/',
             params=self.api.authenticated_params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -265,7 +265,7 @@ class FriendshipTests(ApiTestBase):
         user_id = '123456789'
         self.api.disable_post_notifications(user_id)
         call_api.assert_called_with(
-            'friendships/unfavorite/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/unfavorite/{user_id}/',
             params=self.api.authenticated_params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -276,7 +276,7 @@ class FriendshipTests(ApiTestBase):
         params = {'user_id': user_id, 'radio_type': self.api.radio_type}
         params.update(self.api.authenticated_params)
         call_api.assert_called_with(
-            'friendships/ignore/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/ignore/{user_id}/',
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -287,5 +287,5 @@ class FriendshipTests(ApiTestBase):
         params = {'user_id': user_id, 'radio_type': self.api.radio_type}
         params.update(self.api.authenticated_params)
         call_api.assert_called_with(
-            'friendships/remove_follower/{user_id!s}/'.format(**{'user_id': user_id}),
+            f'friendships/remove_follower/{user_id}/',
             params=params)

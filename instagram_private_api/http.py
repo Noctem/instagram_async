@@ -42,7 +42,7 @@ class MultipartFormDataEncoder:
     def __init__(self, boundary=None):
         self.boundary = boundary or \
             ''.join(random.choice(string.ascii_letters + string.digits + '_-') for _ in range(30))
-        self.content_type = 'multipart/form-data; boundary={}'.format(self.boundary)
+        self.content_type = f'multipart/form-data; boundary={self.boundary}'
 
     @classmethod
     def u(cls, s):
@@ -61,7 +61,7 @@ class MultipartFormDataEncoder:
         encoder = codecs.getencoder('utf-8')
         for (key, value) in fields:
             key = self.u(key)
-            yield encoder('--{}\r\n'.format(self.boundary))
+            yield encoder(f'--{self.boundary}\r\n')
             yield encoder(self.u('Content-Disposition: form-data; name="{}"\r\n').format(key))
             yield encoder('\r\n')
             if isinstance(value, (int, float)):
@@ -71,7 +71,7 @@ class MultipartFormDataEncoder:
         for (key, filename, contenttype, fd) in files:
             key = self.u(key)
             filename = self.u(filename)
-            yield encoder('--{}\r\n'.format(self.boundary))
+            yield encoder(f'--{self.boundary}\r\n')
             yield encoder(self.u('Content-Disposition: form-data; name="{}"; filename="{}"\r\n').format(key, filename))
             yield encoder('Content-Type: {}\r\n'.format(
                 contenttype or mimetypes.guess_type(filename)[0] or 'application/octet-stream'))
@@ -79,7 +79,7 @@ class MultipartFormDataEncoder:
             yield encoder('\r\n')
             yield (fd, len(fd))
             yield encoder('\r\n')
-        yield encoder('--{}--\r\n'.format(self.boundary))
+        yield encoder(f'--{self.boundary}--\r\n')
 
     def encode(self, fields, files):
         body = BytesIO()

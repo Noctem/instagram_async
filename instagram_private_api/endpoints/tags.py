@@ -1,6 +1,5 @@
 import json
 
-from ..compat import compat_urllib_parse
 from ..utils import raise_if_invalid_rank_token
 from ..compatpatch import ClientCompatPatch
 
@@ -15,8 +14,7 @@ class TagsEndpointsMixin:
         :param tag:
         :return:
         """
-        endpoint = 'tags/{tag!s}/info/'.format(
-            **{'tag': compat_urllib_parse.quote(tag.encode('utf8'))})
+        endpoint = f'tags/{tag}/info/'
         res = self._call_api(endpoint)
         return res
 
@@ -27,8 +25,7 @@ class TagsEndpointsMixin:
         :param tag:
         :return:
         """
-        endpoint = 'tags/{tag!s}/related/'.format(
-            **{'tag': compat_urllib_parse.quote(tag.encode('utf8'))})
+        endpoint = f'tags/{tag}/related/'
         query = {
             'visited': json.dumps([{'id': tag, 'type': 'hashtag'}], separators=(',', ':')),
             'related_types': json.dumps(['hashtag', 'location'], separators=(',', ':'))}
@@ -67,7 +64,7 @@ class TagsEndpointsMixin:
         :param user_id:
         :return:
         """
-        endpoint = 'users/{user_id!s}/following_tags_info/'.format(user_id=user_id)
+        endpoint = f'users/{user_id}/following_tags_info/'
         return self._call_api(endpoint)
 
     def tag_follow_suggestions(self):
@@ -81,8 +78,7 @@ class TagsEndpointsMixin:
         :param tag:
         :return:
         """
-        endpoint = 'tags/follow/{hashtag!s}/'.format(
-            hashtag=compat_urllib_parse.quote(tag.encode('utf-8')))
+        endpoint = f'tags/follow/{tag}/'
         return self._call_api(endpoint, params=self.authenticated_params)
 
     def tag_unfollow(self, tag):
@@ -92,8 +88,7 @@ class TagsEndpointsMixin:
         :param tag:
         :return:
         """
-        endpoint = 'tags/unfollow/{hashtag!s}/'.format(
-            hashtag=compat_urllib_parse.quote(tag.encode('utf-8')))
+        endpoint = f'tags/unfollow/{tag}/'
         return self._call_api(endpoint, params=self.authenticated_params)
 
     def tag_section(self, tag, tab='top', **kwargs):
@@ -111,11 +106,10 @@ class TagsEndpointsMixin:
         """
         valid_tabs = ['top', 'recent', 'places']
         if tab not in valid_tabs:
-            raise ValueError('Invalid tab: {}'.format(tab))
+            raise ValueError(f'Invalid tab: {tab}')
 
         extract_media_only = kwargs.pop('extract', False)
-        endpoint = 'tags/{tag!s}/sections/'.format(
-            **{'tag': compat_urllib_parse.quote(tag.encode('utf8'))})
+        endpoint = f'tags/{tag}/sections/'
 
         params = {
             'supported_tabs': json.dumps(valid_tabs, separators=(',', ':')),

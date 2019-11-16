@@ -85,11 +85,7 @@ class UploadTests(ApiTestBase):
 
     def strip_url_params(self, thumbnail_url):
         o = compat_urllib_parse_urlparse(thumbnail_url)
-        return '{scheme}://{host}{path}'.format(
-            scheme=o.scheme,
-            host=o.netloc,
-            path=o.path
-        )
+        return f'{o.scheme}://{o.netloc}{opath}'
 
     @unittest.skip('Modifies data.')
     def test_post_video(self):
@@ -239,10 +235,10 @@ class UploadTests(ApiTestBase):
                     'user': {'pk': 10, 'profile_pic_url': ''}}
             }
 
-            photo_data = '...'.encode('ascii')
+            photo_data = b'...'
             headers = self.api.default_headers
             headers.update({
-                'Content-Type': 'multipart/form-data; boundary={0!s}'.format(self.api.uuid),
+                'Content-Type': f'multipart/form-data; boundary={self.api.uuid}',
                 'Content-Length': len(photo_data)
             })
             sidecar_fields = ''
@@ -291,7 +287,7 @@ class UploadTests(ApiTestBase):
                 self.api.post_photo_story(photo_data, size)
 
             request.assert_called_with(
-                '{0}{1}'.format(self.api.api_url.format(version='v1'), 'upload/photo/'),
+                '{}{}'.format(self.api.api_url.format(version='v1'), 'upload/photo/'),
                 body.encode('utf-8'), headers=headers)
 
             if not is_reel:
@@ -427,7 +423,7 @@ class UploadTests(ApiTestBase):
                 video_data_len = get_file_size(video_data)
                 is_fp = True
             if not thumbnail_data:
-                thumbnail_data = '....'.encode('ascii')
+                thumbnail_data = b'....'
             upload_id = str(int(ts_now * 1000))
 
             chunk_sizes = []
@@ -505,7 +501,7 @@ class UploadTests(ApiTestBase):
                 chunk_end = min(sum(chunk_sizes[:i + 1]), video_data_len)
                 if i < (chunk_count - 1):
                     read_response_side_effect.append(
-                        '{0:d}-{1:d}/{2:d}'.format(chunk_start, chunk_end - 1, video_data_len))
+                        '{}-{}/{}'.format(chunk_start, chunk_end - 1, video_data_len))
                 else:
                     read_response_side_effect.append(json.dumps({'status': 'ok'}))
 
@@ -563,7 +559,7 @@ class UploadTests(ApiTestBase):
                     headers['Cookie'] = 'sessionid=' + self.api.get_cookie_value('sessionid')
                 headers['job'] = '1111'
                 headers['Content-Length'] = chunk_end - chunk_start
-                headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(
+                headers['Content-Range'] = 'bytes {}-{}/{}'.format(
                     chunk_start,
                     chunk_end - 1,
                     video_data_len)

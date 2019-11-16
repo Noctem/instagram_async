@@ -19,7 +19,7 @@ class MediaEndpointsMixin:
         :param media_id:
         :return:
         """
-        endpoint = 'media/{media_id!s}/info/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/info/'
         res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -57,7 +57,7 @@ class MediaEndpointsMixin:
         :param media_id:
         :return:
         """
-        endpoint = 'media/{media_id!s}/permalink/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/permalink/'
         res = self._call_api(endpoint)
         return res
 
@@ -70,7 +70,7 @@ class MediaEndpointsMixin:
             **max_id**: For pagination
         :return:
         """
-        endpoint = 'media/{media_id!s}/comments/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/comments/'
         query = {
             'can_support_threading': 'true'
         }
@@ -96,7 +96,7 @@ class MediaEndpointsMixin:
         :return:
         """
 
-        endpoint = 'media/{media_id!s}/comments/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/comments/'
 
         comments = []
         results = self._call_api(endpoint, query=kwargs)
@@ -135,8 +135,7 @@ class MediaEndpointsMixin:
             **max_id**: For pagination
         :return:
         """
-        endpoint = 'media/{media_id!s}/comments/{comment_id!s}/child_comments/'.format(
-            **{'media_id': media_id, 'comment_id': comment_id})
+        endpoint = f'media/{media_id}/comments/{comment_id}/child_comments/'
         res = self._call_api(endpoint, query=kwargs)
 
         if self.auto_patch:
@@ -156,8 +155,7 @@ class MediaEndpointsMixin:
         :param max_id: The comment's 'next_max_child_cursor' value from``media_comments()``
         :return:
         """
-        endpoint = 'media/{media_id!s}/comments/{comment_id!s}/inline_child_comments/'.format(
-            **{'media_id': media_id, 'comment_id': comment_id})
+        endpoint = f'media/{media_id}/comments/{comment_id}/inline_child_comments/'
         query = {'max_id': max_id}
         if kwargs:
             query.update(kwargs)
@@ -185,7 +183,7 @@ class MediaEndpointsMixin:
         """
         if usertags is None:
             usertags = []
-        endpoint = 'media/{media_id!s}/edit_media/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/edit_media/'
         params = {'caption_text': caption}
         params.update(self.authenticated_params)
         if usertags:
@@ -206,7 +204,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok", "did_delete": true}
         """
-        endpoint = 'media/{media_id!s}/delete/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/delete/'
         params = {'media_id': media_id}
         params.update(self.authenticated_params)
         return self._call_api(endpoint, params=params)
@@ -254,7 +252,7 @@ class MediaEndpointsMixin:
         if len(re.findall(r'\bhttps?://\S+\.\S+', comment_text)) > 1:
             raise ValueError('The comment cannot contain more than 1 URL.')
 
-        endpoint = 'media/{media_id!s}/comment/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/comment/'
         params = {
             'comment_text': comment_text,
             'user_breadcrumb': gen_user_breadcrumb(len(comment_text)),
@@ -279,8 +277,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{media_id!s}/comment/{comment_id!s}/delete/'.format(**{
-            'media_id': media_id, 'comment_id': comment_id})
+        endpoint = f'media/{media_id}/comment/{comment_id}/delete/'
         params = {}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params)
@@ -299,8 +296,7 @@ class MediaEndpointsMixin:
         """
         if not isinstance(comment_ids, list):
             comment_ids = [comment_ids]
-        endpoint = 'media/{media_id!s}/comment/bulk_delete/'.format(**{
-            'media_id': media_id})
+        endpoint = f'media/{media_id}/comment/bulk_delete/'
         params = {
             'comment_ids_to_delete': ','.join(
                 [str(comment_id) for comment_id in comment_ids])
@@ -316,7 +312,7 @@ class MediaEndpointsMixin:
         :param media_id:
         :return:
         """
-        endpoint = 'media/{media_id!s}/likers/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/likers/'
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
@@ -332,7 +328,7 @@ class MediaEndpointsMixin:
         :return:
         """
         warnings.warn('This endpoint is experimental. Do not use.', ClientExperimentalWarning)
-        res = self._call_api('media/{media_id!s}/likers_chrono/'.format(**{'media_id': media_id}))
+        res = self._call_api(f'media/{media_id}/likers_chrono/')
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
              for u in res.get('users', [])]
@@ -349,7 +345,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{media_id!s}/like/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/like/'
         params = {
             'media_id': media_id,
             'module_name': module_name,
@@ -371,7 +367,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{media_id!s}/unlike/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/unlike/'
         params = {
             'media_id': media_id,
             'module_name': module_name,
@@ -412,8 +408,7 @@ class MediaEndpointsMixin:
             now = int(time.time())
             for i, reel in enumerate(reels):
                 reel_seen_at = now - min(i + 1 + randint(0, 2), max(0, now - reel['taken_at']))
-                reels_seen['{0!s}_{1!s}'.format(reel['id'], reel['user']['pk'])] = [
-                    '{0!s}_{1!s}'.format(reel['taken_at'], reel_seen_at)]
+                reels_seen[f"{reel['id']}_{reel['user']['pk']}"] = [f"{reel['taken_at']}_{reel_seen_at}"]
             params = {'reels': reels_seen}
         else:
             params = {'reels': reels}
@@ -432,7 +427,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{comment_id!s}/comment_like/'.format(**{'comment_id': comment_id})
+        endpoint = f'media/{comment_id}/comment_like/'
         params = self.authenticated_params
         return self._call_api(endpoint, params=params)
 
@@ -443,7 +438,7 @@ class MediaEndpointsMixin:
         :param comment_id:
         :return:
         """
-        endpoint = 'media/{comment_id!s}/comment_likers/'.format(**{'comment_id': comment_id})
+        endpoint = f'media/{comment_id}/comment_likers/'
         res = self._call_api(endpoint)
         if self.auto_patch:
             [ClientCompatPatch.list_user(u, drop_incompat_keys=self.drop_incompat_keys)
@@ -460,7 +455,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{comment_id!s}/comment_unlike/'.format(**{'comment_id': comment_id})
+        endpoint = f'media/{comment_id}/comment_unlike/'
         params = self.authenticated_params
         return self._call_api(endpoint, params=params)
 
@@ -475,7 +470,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{media_id!s}/save/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/save/'
         params = {'radio_type': self.radio_type}
         if added_collection_ids:
             if isinstance(added_collection_ids, str):
@@ -495,7 +490,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{media_id!s}/unsave/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/unsave/'
         params = {'radio_type': self.radio_type}
         if removed_collection_ids:
             if isinstance(removed_collection_ids, str):
@@ -514,7 +509,7 @@ class MediaEndpointsMixin:
 
                 {"status": "ok"}
         """
-        endpoint = 'media/{media_id!s}/disable_comments/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/disable_comments/'
         params = {
             '_csrftoken': self.csrftoken,
             '_uuid': self.uuid,
@@ -533,7 +528,7 @@ class MediaEndpointsMixin:
                 {"status": "ok"}
         """
 
-        endpoint = 'media/{media_id!s}/enable_comments/'.format(**{'media_id': media_id})
+        endpoint = f'media/{media_id}/enable_comments/'
         params = {
             '_csrftoken': self.csrftoken,
             '_uuid': self.uuid,
@@ -557,10 +552,7 @@ class MediaEndpointsMixin:
         if media_type not in MediaTypes.ALL:
             raise ValueError('Invalid media type.')
 
-        endpoint = 'media/{media_id!s}/{only_me!s}/'.format(**{
-            'media_id': media_id,
-            'only_me': 'only_me' if not undo else 'undo_only_me'
-        })
+        endpoint = f"media/{media_id}/{'only_me' if not undo else 'undo_only_me'}/"
         params = {'media_id': media_id}
         params.update(self.authenticated_params)
         res = self._call_api(endpoint, params=params, query={'media_type': media_type})
@@ -584,6 +576,5 @@ class MediaEndpointsMixin:
             **max_id**: For pagination
         :return:
         """
-        endpoint = 'media/{story_pk!s}/list_reel_media_viewer/'.format(
-            story_pk=story_pk)
+        endpoint = f'media/{story_pk}/list_reel_media_viewer/'
         return self._call_api(endpoint, query=kwargs)

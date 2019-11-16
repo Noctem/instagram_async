@@ -15,7 +15,7 @@ class CollectionsEndpointsMixin:
         :param collection_id: Collection ID
         :return:
         """
-        endpoint = 'feed/collection/{collection_id!s}/'.format(**{'collection_id': collection_id})
+        endpoint = f'feed/collection/{collection_id}/'
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch and res.get('items'):
             [ClientCompatPatch.media(m['media'], drop_incompat_keys=self.drop_incompat_keys)
@@ -75,7 +75,7 @@ class CollectionsEndpointsMixin:
             'added_media_ids': json.dumps(added_media_ids, separators=(',', ':'))
         }
         params.update(self.authenticated_params)
-        endpoint = 'collections/{collection_id!s}/edit/'.format(**{'collection_id': collection_id})
+        endpoint = f'collections/{collection_id}/edit/'
         return self._call_api(endpoint, params=params)
 
     def delete_collection(self, collection_id):
@@ -91,5 +91,5 @@ class CollectionsEndpointsMixin:
                 }
         """
         params = self.authenticated_params
-        endpoint = 'collections/{collection_id!s}/delete/'.format(**{'collection_id': collection_id})
+        endpoint = f'collections/{collection_id}/delete/'
         return self._call_api(endpoint, params=params)

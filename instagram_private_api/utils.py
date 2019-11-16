@@ -15,7 +15,7 @@ def raise_if_invalid_rank_token(val, required=True):
     if required and not val:
         raise ValueError('rank_token is required')
     if not re.match(VALID_UUID_RE, val):
-        raise ValueError('Invalid rank_token: {}'.format(val))
+        raise ValueError(f'Invalid rank_token: {val}')
 
 
 def gen_user_breadcrumb(size):
@@ -33,12 +33,9 @@ def gen_user_breadcrumb(size):
 
     text_change_event_count = max(1, size / randint(3, 5))
 
-    data = '{size!s} {elapsed!s} {count!s} {dt!s}'.format(**{
-        'size': size, 'elapsed': time_elapsed, 'count': text_change_event_count, 'dt': dt
-    })
-    return '{0!s}\n{1!s}\n'.format(
-        base64.b64encode(hmac.new(key.encode('ascii'), data.encode('ascii'), digestmod=hashlib.sha256).digest()),
-        base64.b64encode(data.encode('ascii')))
+    data = f'{size} {time_elapsed} {text_change_event_count} {dt}'
+    return (base64.b64encode(hmac.new(key.encode('ascii'), data.encode('ascii'), digestmod=hashlib.sha256).digest())
+            + b'\n' + base64.b64encode(data.encode('ascii')) + b'\n').decode()
 
 
 class Chunk:
@@ -230,7 +227,7 @@ class InstagramID:
         :param media_id:
         :return:
         """
-        return 'https://www.instagram.com/p/{0!s}/'.format(cls.shorten_media_id(media_id))
+        return f'https://www.instagram.com/p/{cls.shorten_media_id(media_id)}/'
 
     @classmethod
     def shorten_media_id(cls, media_id):
@@ -241,7 +238,7 @@ class InstagramID:
         :return:
         """
         # media id format: AAA_BB where AAA is the pk, BB is user_id
-        internal_id = int((str(media_id).split('_')[0]))
+        internal_id = int(str(media_id).split('_')[0])
         return cls.shorten_id(internal_id)
 
     @classmethod

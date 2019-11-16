@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import json
 import re
@@ -22,7 +21,7 @@ class ClientError(Exception):
     def __init__(self, msg, code=None, error_response=''):
         self.code = code or 0
         self.error_response = error_response
-        super(ClientError, self).__init__(msg)
+        super().__init__(msg)
 
     @property
     def msg(self):
@@ -68,7 +67,7 @@ class ClientCheckpointRequiredError(ClientError):
             error_info = json.loads(self.error_response)
             return error_info.get('challenge', {}).get('url') or error_info.get('checkpoint_url')
         except ValueError as ve:
-            logger.warning('Error parsing error response: {}'.format(str(ve)))
+            logger.warning(f'Error parsing error response: {ve}')
         return None
 
 
@@ -131,11 +130,11 @@ class ErrorHandler:
                             error_response=json.dumps(error_obj)
                         )
             if error_message_type:
-                error_msg = '{0!s}: {1!s}'.format(http_error.reason, error_message_type)
+                error_msg = f'{http_error.reason}: {error_message_type}'
             else:
                 error_msg = http_error.reason
         except ValueError as ve:
             # do nothing else, prob can't parse json
-            logger.warning('Error parsing error response: {}'.format(str(ve)))
+            logger.warning(f'Error parsing error response: {ve}')
 
         raise ClientError(error_msg, http_error.code, error_response)

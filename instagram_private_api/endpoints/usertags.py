@@ -12,7 +12,7 @@ class UsertagsEndpointsMixin:
         :param kwargs:
         :return:
         """
-        endpoint = 'usertags/{user_id!s}/feed/'.format(**{'user_id': user_id})
+        endpoint = f'usertags/{user_id}/feed/'
         query = {'rank_token': self.rank_token, 'ranked_content': 'true'}
         query.update(kwargs)
         res = self._call_api(endpoint, query=query)
@@ -28,7 +28,7 @@ class UsertagsEndpointsMixin:
         :param media_id: Media id
         :return:
         """
-        endpoint = 'usertags/{media_id!s}/remove/'.format(**{'media_id': media_id})
+        endpoint = f'usertags/{media_id}/remove/'
         res = self._call_api(endpoint, params=self.authenticated_params)
         if self.auto_patch:
             ClientCompatPatch.media(res.get('media'))

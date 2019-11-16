@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
 import time
-from ..common import ApiTestBase, compat_mock, compat_urllib_parse
+from ..common import ApiTestBase, compat_mock
 
 
 class TagsTests(ApiTestBase):
@@ -51,7 +49,7 @@ class TagsTests(ApiTestBase):
 
         time.sleep(self.sleep_interval)
 
-        results = self.api.tag_info(u'日本')
+        results = self.api.tag_info('日本')
         self.assertEqual(results.get('status'), 'ok')
         self.assertGreater(results.get('media_count'), 0, 'No media_count returned.')
 
@@ -85,8 +83,7 @@ class TagsTests(ApiTestBase):
         }
         self.api.tag_follow(tag)
         call_api.assert_called_with(
-            'tags/follow/{hashtag!s}/'.format(
-                hashtag=compat_urllib_parse.quote(tag.encode('utf-8'))),
+            f'tags/follow/{tag}/',
             params=self.api.authenticated_params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -97,8 +94,7 @@ class TagsTests(ApiTestBase):
         }
         self.api.tag_unfollow(tag)
         call_api.assert_called_with(
-            'tags/unfollow/{hashtag!s}/'.format(
-                hashtag=compat_urllib_parse.quote(tag.encode('utf-8'))),
+            f'tags/unfollow/{tag}/',
             params=self.api.authenticated_params)
 
     def test_tag_section(self):

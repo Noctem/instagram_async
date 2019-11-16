@@ -226,7 +226,7 @@ class ClientTests(ApiTestBase):
 
             compat_urllib_error.HTTPError(
                 '', 500, 'Internal Server Error', {},
-                BytesIO('Internal Server Error'.encode('ascii'))),
+                BytesIO(b'Internal Server Error')),
 
             compat_urllib_error.HTTPError(
                 '', 400, 'Bad Request', {},

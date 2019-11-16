@@ -17,7 +17,7 @@ class IGTVEndpointsMixin:
         """
         if (channel_id not in ('for_you', 'chrono_following', 'popular', 'continue_watching')
                 and not re.match(USER_CHANNEL_ID_RE, channel_id)):
-            raise ValueError('Invalid channel_id: {}'.format(channel_id))
+            raise ValueError(f'Invalid channel_id: {channel_id}')
 
         endpoint = 'igtv/channel/'
         params = {'id': channel_id}

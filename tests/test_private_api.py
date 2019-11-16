@@ -46,7 +46,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: {0!s}'.format(__version__))
+    print(f'Client version: {__version__}')
 
     cached_auth = None
     if args.settings_file_path and os.path.isfile(args.settings_file_path):
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             # Example of how to generate a uuid.
             # You can generate a fixed uuid if you use a fixed value seed
             uuid = Client.generate_uuid(
-                seed='{pw!s}.{usr!s}.{ts!s}'.format(**{'pw': args.username, 'usr': args.password, 'ts': ts_seed}))
+                seed=f'{args.username}.{args.password}.{ts_seed}')
         else:
             uuid = args.uuid
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
             # Example of how to generate a device id.
             # You can generate a fixed device id if you use a fixed value seed
             device_id = Client.generate_deviceid(
-                seed='{usr!s}.{ts!s}.{pw!s}'.format(**{'pw': args.password, 'usr': args.username, 'ts': ts_seed}))
+                seed=f'{args.password}.{args.username}.{ts_seed}')
         else:
             device_id = args.device_id
 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
     def match_regex(test_name):
         for test_re in args.tests:
-            test_re = r'{0!s}'.format(test_re)
+            test_re = f'{test_re}'
             if re.match(test_re, test_name):
                 return True
         return False
@@ -160,5 +160,4 @@ if __name__ == '__main__':
         sys.exit(not result.wasSuccessful())
 
     except ClientError as e:
-        print('Unexpected ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(
-            e.msg, e.code, e.error_response))
+        print(f'Unexpected ClientError {e.msg} (Code: {e.code}, Response: {e.error_response})')

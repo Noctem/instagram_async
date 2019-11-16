@@ -56,7 +56,7 @@ class ApiTestBase(unittest.TestCase):
     """Main base class for private api tests."""
 
     def __init__(self, testname, api, user_id=None, media_id=None):
-        super(ApiTestBase, self).__init__(testname)
+        super().__init__(testname)
         self.api = api
         self.test_user_id = user_id
         self.test_media_id = media_id

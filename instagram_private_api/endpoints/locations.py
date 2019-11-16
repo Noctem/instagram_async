@@ -30,7 +30,7 @@ class LocationsEndpointsMixin:
                   }
                 }
         """
-        endpoint = 'locations/{location_id!s}/info/'.format(**{'location_id': location_id})
+        endpoint = f'locations/{location_id}/info/'
         return self._call_api(endpoint)
 
     def location_related(self, location_id, **kwargs):
@@ -40,7 +40,7 @@ class LocationsEndpointsMixin:
         :param location_id:
         :return:
         """
-        endpoint = 'locations/{location_id!s}/related/'.format(**{'location_id': location_id})
+        endpoint = f'locations/{location_id}/related/'
         query = {
             'visited': json.dumps([{'id': location_id, 'type': 'location'}], separators=(',', ':')),
             'related_types': json.dumps(['location'], separators=(',', ':'))}
@@ -110,10 +110,10 @@ class LocationsEndpointsMixin:
         """
         raise_if_invalid_rank_token(rank_token)
         if tab not in ('ranked', 'recent'):
-            raise ValueError('Invalid tab: {}'.format(tab))
+            raise ValueError(f'Invalid tab: {tab}')
 
         extract_media_only = kwargs.pop('extract', False)
-        endpoint = 'locations/{location_id!s}/sections/'.format(**{'location_id': location_id})
+        endpoint = f'locations/{location_id}/sections/'
         params = {
             'rank_token': rank_token,
             'tab': tab,
@@ -154,7 +154,7 @@ class LocationsEndpointsMixin:
             :meth:`generate_uuid`. You should use the same rank_token for paging through a single location.
         :return:
         """
-        endpoint = 'locations/{location_id!s}/story/'.format(**{'location_id': location_id})
+        endpoint = f'locations/{location_id}/story/'
         # params = {
         #     'rank_token': rank_token,
         #     'tab': tab,

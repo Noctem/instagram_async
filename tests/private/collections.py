@@ -102,11 +102,11 @@ class CollectionsTests(ApiTestBase):
 
         self.api.edit_collection(collection_id, media_ids)
         call_api.assert_called_with(
-            'collections/{collection_id!s}/edit/'.format(**{'collection_id': collection_id}),
+            f'collections/{collection_id}/edit/',
             params=params)
         self.api.edit_collection(collection_id, media_ids[0])
         call_api.assert_called_with(
-            'collections/{collection_id!s}/edit/'.format(**{'collection_id': collection_id}),
+            f'collections/{collection_id}/edit/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -125,5 +125,5 @@ class CollectionsTests(ApiTestBase):
 
         self.api.delete_collection(collection_id)
         call_api.assert_called_with(
-            'collections/{collection_id!s}/delete/'.format(**{'collection_id': collection_id}),
+            f'collections/{collection_id}/delete/',
             params=self.api.authenticated_params)

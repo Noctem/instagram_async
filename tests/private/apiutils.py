@@ -39,7 +39,7 @@ class ApiUtilsTests(unittest.TestCase):
         ]
 
     def __init__(self, testname):
-        super(ApiUtilsTests, self).__init__(testname)
+        super().__init__(testname)
 
     def test_expand_code(self):
         id = InstagramID.expand_code('BRo7njqD75U')

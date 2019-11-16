@@ -70,10 +70,10 @@ class UploadEndpointsMixin:
                 location[self.EXTERNAL_LOC_SOURCES[external_source]] = location['external_id']
         for k in location_keys:
             if not location.get(k):
-                raise ValueError('Location dict must contain "{0!s}".'.format(k))
+                raise ValueError(f'Location dict must contain "{k}".')
         for k, val in self.EXTERNAL_LOC_SOURCES.items():
             if location['external_source'] == k and not location.get(val):
-                raise ValueError('Location dict must contain "{0!s}".'.format(val))
+                raise ValueError(f'Location dict must contain "{val}".')
 
         media_loc = {
             'name': location['name'],
@@ -430,7 +430,7 @@ class UploadEndpointsMixin:
                 fields.append(('media_type', MediaTypes.VIDEO))
 
         files = [
-            ('photo', 'pending_media_{0!s}{1!s}'.format(str(int(time.time() * 1000)), '.jpg'),
+            ('photo', 'pending_media_{}{}'.format(str(int(time.time() * 1000)), '.jpg'),
              'application/octet-stream', photo_data)
         ]
 
@@ -439,14 +439,14 @@ class UploadEndpointsMixin:
         headers['Content-Type'] = content_type
         headers['Content-Length'] = len(body)
 
-        endpoint_url = '{0}{1}'.format(self.api_url.format(version='v1'), endpoint)
+        endpoint_url = '{}{}'.format(self.api_url.format(version='v1'), endpoint)
         req = compat_urllib_request.Request(endpoint_url, body, headers=headers)
         try:
-            self.logger.debug('POST {0!s}'.format(endpoint_url))
+            self.logger.debug(f'POST {endpoint_url}')
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_response = self._read_response(e)
-            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
+            self.logger.debug(f'RESPONSE: {e.code} {error_response}')
             ErrorHandler.process(e, error_response)
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
@@ -455,7 +455,7 @@ class UploadEndpointsMixin:
                 connection_error.__class__.__name__, str(connection_error)))
 
         post_response = self._read_response(response)
-        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
+        self.logger.debug(f'RESPONSE: {response.code} {post_response}')
         json_response = json.loads(post_response)
 
         if for_video and is_sidecar:
@@ -576,7 +576,7 @@ class UploadEndpointsMixin:
                             skip_chunk = True
                             break
                     if skip_chunk:
-                        self.logger.debug('Skipped chunk: {0:d} - {1:d}'.format(chunk.start, chunk.end - 1))
+                        self.logger.debug('Skipped chunk: {} - {}'.format(chunk.start, chunk.end - 1))
                         continue
 
                     headers = self.default_headers
@@ -588,10 +588,10 @@ class UploadEndpointsMixin:
                         headers['Cookie'] = 'sessionid=' + self.get_cookie_value('sessionid')
                     headers['job'] = upload_job
                     headers['Content-Length'] = chunk.length
-                    headers['Content-Range'] = 'bytes {0:d}-{1:d}/{2:d}'.format(
+                    headers['Content-Range'] = 'bytes {}-{}/{}'.format(
                         chunk.start, chunk.end - 1, video_file_len)
-                    self.logger.debug('POST {0!s}'.format(upload_url))
-                    self.logger.debug('Uploading Content-Range: {0!s}'.format(headers['Content-Range']))
+                    self.logger.debug(f'POST {upload_url}')
+                    self.logger.debug('Uploading Content-Range: {}'.format(headers['Content-Range']))
 
                     req = compat_urllib_request.Request(
                         str(upload_url), data=data, headers=headers)
@@ -599,7 +599,7 @@ class UploadEndpointsMixin:
                     try:
                         res = self.opener.open(req, timeout=self.timeout)
                         post_response = self._read_response(res)
-                        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(res.code, post_response))
+                        self.logger.debug(f'RESPONSE: {res.code} {post_response}')
                         if res.info().get('Content-Type', '').startswith('application/json'):
                             # last chunk
                             upload_res = json.loads(post_response)
@@ -615,15 +615,15 @@ class UploadEndpointsMixin:
                                     successful_chunk_ranges.append((int(mobj.group('start')), int(mobj.group('end'))))
                                 else:
                                     self.logger.error(
-                                        'Received unexpected chunk upload response: {0!s}'.format(post_response))
+                                        f'Received unexpected chunk upload response: {post_response}')
                                     raise ClientError(
-                                        'Upload has failed due to unexpected upload response: {0!s}'.format(
+                                        'Upload has failed due to unexpected upload response: {}'.format(
                                             post_response),
                                         code=500)
 
                     except compat_urllib_error.HTTPError as e:
                         error_response = self._read_response(e)
-                        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
+                        self.logger.debug(f'RESPONSE: {e.code} {error_response}')
                         ErrorHandler.process(e, error_response)
 
                     except (SSLError, timeout, SocketError,
@@ -663,14 +663,14 @@ class UploadEndpointsMixin:
             except ClientConnectionError as cce:
                 if i < configure_retry_max:
                     self.logger.warn(
-                        'Retry configure after {0:f} seconds: {1:s}'.format(
+                        'Retry configure after {:f} seconds: {:s}'.format(
                             configure_delay, cce.msg))
                     time.sleep(configure_delay)
                 else:
                     raise
             except ClientError as ce:
                 if (ce.code == 202 or ce.msg == 'Transcode timeout') and i < configure_retry_max:
-                    self.logger.warn('Retry configure after {0:f} seconds'.format(configure_delay))
+                    self.logger.warn(f'Retry configure after {configure_delay:f} seconds')
                     time.sleep(configure_delay)
                 else:
                     raise
@@ -728,7 +728,7 @@ class UploadEndpointsMixin:
             if len(children_metadata) >= 10:
                 continue
             if media.get('type', '') not in ['image', 'video']:
-                raise ValueError('Invalid media type: {0!s}'.format(media.get('type', '')))
+                raise ValueError('Invalid media type: {}'.format(media.get('type', '')))
             if not media.get('data'):
                 raise ValueError('Data not specified.')
             if not media.get('size'):
@@ -763,7 +763,7 @@ class UploadEndpointsMixin:
             children_metadata.append(metadata)
 
         if len(children_metadata) <= 1:
-            raise ValueError('Invalid number of media objects: {0:d}'.format(len(children_metadata)))
+            raise ValueError('Invalid number of media objects: {}'.format(len(children_metadata)))
 
         # configure as sidecar
         endpoint = 'media/configure_sidecar/'

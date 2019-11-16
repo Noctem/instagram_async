@@ -60,10 +60,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
              MiscEndpointsMixin, LocationsEndpointsMixin, TagsEndpointsMixin,
              UsersEndpointsMixin, UploadEndpointsMixin, UsertagsEndpointsMixin,
              CollectionsEndpointsMixin, HighlightsEndpointsMixin,
-             IGTVEndpointsMixin, object):
+             IGTVEndpointsMixin):
     """Main API client class for the private app api."""
 
-    API_URL = 'https://i.instagram.com/api/{version!s}/'
+    API_URL = 'https://i.instagram.com/api/{version}/'
 
     USER_AGENT = Constants.USER_AGENT
     IG_SIG_KEY = Constants.IG_SIG_KEY
@@ -162,7 +162,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         cookie_string = kwargs.pop('cookie', None) or user_settings.get('cookie')
         cookie_jar = ClientCookieJar(cookie_string=cookie_string)
         if cookie_string and cookie_jar.auth_expires and int(time.time()) >= cookie_jar.auth_expires:
-            raise ClientCookieExpiredError('Cookie expired at {0!s}'.format(cookie_jar.auth_expires))
+            raise ClientCookieExpiredError(f'Cookie expired at {cookie_jar.auth_expires}')
         cookie_handler = compat_urllib_request.HTTPCookieProcessor(cookie_jar)
 
         proxy_handler = kwargs.pop('proxy_handler', None)
@@ -172,10 +172,10 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 warnings.warn('Proxy support is alpha.', UserWarning)
                 parsed_url = compat_urllib_parse_urlparse(proxy)
                 if parsed_url.netloc and parsed_url.scheme:
-                    proxy_address = '{0!s}://{1!s}'.format(parsed_url.scheme, parsed_url.netloc)
+                    proxy_address = f'{parsed_url.scheme}://{parsed_url.netloc}'
                     proxy_handler = compat_urllib_request.ProxyHandler({'https': proxy_address})
                 else:
-                    raise ValueError('Invalid proxy argument: {0!s}'.format(proxy))
+                    raise ValueError(f'Invalid proxy argument: {proxy}')
         handlers = []
         if proxy_handler:
             handlers.append(proxy_handler)
@@ -207,8 +207,8 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
                 raise ClientLoginRequiredError('login_required', code=400)
             self.login()
 
-        self.logger.debug('USERAGENT: {0!s}'.format(self.user_agent))
-        super(Client, self).__init__()
+        self.logger.debug(f'USERAGENT: {self.user_agent}')
+        super().__init__()
 
     @property
     def settings(self):
@@ -226,25 +226,24 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     @property
     def user_agent(self):
         """Returns the useragent string that the client is currently using."""
-        return Constants.USER_AGENT_FORMAT.format(**{
-            'app_version': self.app_version,
-            'android_version': self.android_version,
-            'android_release': self.android_release,
-            'brand': self.phone_manufacturer,
-            'device': self.phone_device,
-            'model': self.phone_model,
-            'dpi': self.phone_dpi,
-            'resolution': self.phone_resolution,
-            'chipset': self.phone_chipset,
-            'version_code': self.version_code})
+        return Constants.USER_AGENT_FORMAT.format(
+            app_version=self.app_version,
+            android_version=self.android_version,
+            android_release=self.android_release,
+            brand=self.phone_manufacturer,
+            device=self.phone_device,
+            model=self.phone_model,
+            dpi=self.phone_dpi,
+            resolution=self.phone_resolution,
+            chipset=self.phone_chipset,
+            version_code=self.version_code)
 
     @user_agent.setter
     def user_agent(self, value):
         """Override the useragent string with your own"""
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
-            raise ValueError('User-agent specified does not fit format required: {0!s}'.format(
-                Constants.USER_AGENT_EXPRESSION))
+            raise ValueError(f'User-agent specified does not fit format required: {Constants.USER_AGENT_EXPRESSION}')
         self.app_version = mobj.group('app_version')
         self.android_release = mobj.group('android_release')
         self.android_version = int(mobj.group('android_version'))
@@ -273,17 +272,17 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             - **chipset**
         :return: A compatible user agent string
         """
-        return Constants.USER_AGENT_FORMAT.format(**{
-            'app_version': kwargs.pop('app_version', None) or Constants.APP_VERSION,
-            'android_version': int(kwargs.pop('android_version', None) or Constants.ANDROID_VERSION),
-            'android_release': kwargs.pop('android_release', None) or Constants.ANDROID_RELEASE,
-            'brand': kwargs.pop('phone_manufacturer', None) or Constants.PHONE_MANUFACTURER,
-            'device': kwargs.pop('phone_device', None) or Constants.PHONE_DEVICE,
-            'model': kwargs.pop('phone_model', None) or Constants.PHONE_MODEL,
-            'dpi': kwargs.pop('phone_dpi', None) or Constants.PHONE_DPI,
-            'resolution': kwargs.pop('phone_resolution', None) or Constants.PHONE_RESOLUTION,
-            'chipset': kwargs.pop('phone_chipset', None) or Constants.PHONE_CHIPSET,
-            'version_code': kwargs.pop('version_code', None) or Constants.VERSION_CODE})
+        return Constants.USER_AGENT_FORMAT.format(
+            app_version=kwargs.pop('app_version', None) or Constants.APP_VERSION,
+            android_version=int(kwargs.pop('android_version', None) or Constants.ANDROID_VERSION),
+            android_release=kwargs.pop('android_release', None) or Constants.ANDROID_RELEASE,
+            brand=kwargs.pop('phone_manufacturer', None) or Constants.PHONE_MANUFACTURER,
+            device=kwargs.pop('phone_device', None) or Constants.PHONE_DEVICE,
+            model=kwargs.pop('phone_model', None) or Constants.PHONE_MODEL,
+            dpi=kwargs.pop('phone_dpi', None) or Constants.PHONE_DPI,
+            resolution=kwargs.pop('phone_resolution', None) or Constants.PHONE_RESOLUTION,
+            chipset=kwargs.pop('phone_chipset', None) or Constants.PHONE_CHIPSET,
+            version_code=kwargs.pop('version_code', None) or Constants.VERSION_CODE)
 
     @staticmethod
     def validate_useragent(value):
@@ -296,8 +295,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         mobj = re.search(Constants.USER_AGENT_EXPRESSION, value)
         if not mobj:
             raise ValueError(
-                'User-agent specified does not fit format required: {0!s}'.format(
-                    Constants.USER_AGENT_EXPRESSION))
+                f'User-agent specified does not fit format required: {Constants.USER_AGENT_EXPRESSION}')
         parse_params = {
             'app_version': mobj.group('app_version'),
             'android_version': int(mobj.group('android_version')),
@@ -373,7 +371,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
     def rank_token(self):
         if not self.authenticated_user_id:
             return None
-        return '{0!s}_{1!s}'.format(self.authenticated_user_id, self.uuid)
+        return f'{self.authenticated_user_id}_{self.uuid}'
 
     @property
     def authenticated_params(self):
@@ -398,7 +396,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
             'Accept-Encoding': 'gzip, deflate',
             'X-IG-Capabilities': self.ig_capabilities,
             'X-IG-Connection-Type': 'WIFI',
-            'X-IG-Connection-Speed': '{0:d}kbps'.format(random.randint(1000, 5000)),
+            'X-IG-Connection-Speed': f'{random.randint(1000, 5000)}kbps',
             'X-IG-App-ID': self.application_id,
             'X-IG-Bandwidth-Speed-KBPS': '-1.000',
             'X-IG-Bandwidth-TotalBytes-B': '0',
@@ -449,7 +447,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :param seed: Seed value to generate a consistent device ID
         :return:
         """
-        return 'android-{0!s}'.format(cls.generate_uuid(True, seed)[:16])
+        return f'android-{cls.generate_uuid(True, seed)[:16]}'
 
     def generate_adid(self, seed=None):
         """
@@ -493,7 +491,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         :param version: for the versioned api base url. Default 'v1'.
         :return:
         """
-        url = '{0}{1}'.format(self.api_url.format(version=version), endpoint)
+        url = self.api_url.format(version=version) + endpoint
         if query:
             url += ('?' if '?' not in endpoint else '&') + compat_urllib_parse.urlencode(query)
 
@@ -502,7 +500,7 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
         if params or params == '':
             headers['Content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
             if params == '':    # force post if empty string
-                data = ''.encode('ascii')
+                data = b''
             else:
                 if not unsigned:
                     json_params = json.dumps(params, separators=(',', ':'))
@@ -518,26 +516,25 @@ class Client(AccountsEndpointsMixin, DiscoverEndpointsMixin, FeedEndpointsMixin,
 
         req = compat_urllib_request.Request(url, data, headers=headers)
         try:
-            self.logger.debug('REQUEST: {0!s} {1!s}'.format(url, req.get_method()))
-            self.logger.debug('DATA: {0!s}'.format(data))
+            self.logger.debug(f'REQUEST: {url} {req.get_method()}')
+            self.logger.debug(f'DATA: {data}')
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_response = self._read_response(e)
-            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
+            self.logger.debug(f'RESPONSE: {e.code} {error_response}')
             ErrorHandler.process(e, error_response)
 
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
                 compat_http_client.HTTPException,
                 ConnectionError) as connection_error:
-            raise ClientConnectionError('{} {}'.format(
-                connection_error.__class__.__name__, str(connection_error)))
+            raise ClientConnectionError(f'{connection_error.__class__.__name__} {connection_error}')
 
         if return_response:
             return response
 
         response_content = self._read_response(response)
-        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, response_content))
+        self.logger.debug(f'RESPONSE: {response.code} {response_content}')
         json_response = json.loads(response_content)
 
         if json_response.get('message', '') == 'login_required':

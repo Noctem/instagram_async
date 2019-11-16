@@ -14,7 +14,7 @@ class UsersEndpointsMixin:
         :param user_id:
         :return:
         """
-        res = self._call_api('users/{user_id!s}/info/'.format(**{'user_id': user_id}))
+        res = self._call_api(f'users/{user_id}/info/')
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -25,7 +25,7 @@ class UsersEndpointsMixin:
         :param user_name:
         :return:
         """
-        res = self._call_api('users/{user_name!s}/usernameinfo/'.format(**{'user_name': user_name}))
+        res = self._call_api(f'users/{user_name}/usernameinfo/')
         if self.auto_patch:
             ClientCompatPatch.user(res['user'], drop_incompat_keys=self.drop_incompat_keys)
         return res
@@ -43,7 +43,7 @@ class UsersEndpointsMixin:
         """
         warnings.warn('This endpoint is experimental. Do not use.', ClientExperimentalWarning)
 
-        endpoint = 'users/{user_id!s}/full_detail_info/'.format(**{'user_id': user_id})
+        endpoint = f'users/{user_id}/full_detail_info/'
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             ClientCompatPatch.user(res['user_detail']['user'], drop_incompat_keys=self.drop_incompat_keys)
@@ -66,7 +66,7 @@ class UsersEndpointsMixin:
             'This endpoint is believed to be obsolete. Do not use.',
             ClientDeprecationWarning)
 
-        endpoint = 'maps/user/{user_id!s}/'.format(**{'user_id': user_id})
+        endpoint = f'maps/user/{user_id}/'
         return self._call_api(endpoint)
 
     def search_users(self, query, **kwargs):
@@ -146,13 +146,13 @@ class UsersEndpointsMixin:
                 }
         """
         if message_prefs not in ['anyone', 'following', 'off']:
-            raise ValueError('Invalid message_prefs: {0!s}'.format(message_prefs))
+            raise ValueError(f'Invalid message_prefs: {message_prefs}')
         params = {'message_prefs': message_prefs}
         if allow_story_reshare is not None:
             params['allow_story_reshare'] = '1' if allow_story_reshare else '0'
         if reel_auto_archive is not None:
             if reel_auto_archive not in ['on', 'off']:
-                raise ValueError('Invalid auto_archive: {0!s}'.format(reel_auto_archive))
+                raise ValueError(f'Invalid auto_archive: {reel_auto_archive}')
             params['reel_auto_archive'] = reel_auto_archive
         if save_to_camera_roll is not None:
             params['save_to_camera_roll'] = '1' if save_to_camera_roll else '0'

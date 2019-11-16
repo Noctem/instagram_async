@@ -260,7 +260,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.edit_media(media_id, 'Hello')
         call_api.assert_called_with(
-            'media/{media_id!s}/edit_media/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/edit_media/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -278,7 +278,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.delete_media(media_id)
         call_api.assert_called_with(
-            'media/{media_id!s}/delete/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/delete/',
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -307,7 +307,7 @@ class MediaTests(ApiTestBase):
             params.update(self.api.authenticated_params)
             self.api.post_comment(media_id, comment_text)
             call_api.assert_called_with(
-                'media/{media_id!s}/comment/'.format(**{'media_id': media_id}),
+                f'media/{media_id}/comment/',
                 params=params)
 
         test_comments = [
@@ -327,8 +327,7 @@ class MediaTests(ApiTestBase):
         comment_id = '123456'
         self.api.delete_comment(media_id, comment_id)
         call_api.assert_called_with(
-            'media/{media_id!s}/comment/{comment_id!s}/delete/'.format(
-                **{'media_id': media_id, 'comment_id': comment_id}),
+            f'media/{media_id}/comment/{comment_id}/delete/',
             params=self.api.authenticated_params)
 
     def test_media_likers(self):
@@ -358,7 +357,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.post_like(media_id, params['module_name'])
         call_api.assert_called_with(
-            'media/{media_id!s}/like/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/like/',
             query={'d': '1'},
             params=params)
 
@@ -379,7 +378,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.delete_like(media_id, params['module_name'])
         call_api.assert_called_with(
-            'media/{media_id!s}/unlike/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/unlike/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -393,7 +392,7 @@ class MediaTests(ApiTestBase):
         comment_id = '1785000000000'
         self.api.comment_like(comment_id)
         call_api.assert_called_with(
-            'media/{comment_id!s}/comment_like/'.format(**{'comment_id': comment_id}),
+            f'media/{comment_id}/comment_like/',
             params=self.api.authenticated_params)
 
     @unittest.skip('Modifies data.')
@@ -407,7 +406,7 @@ class MediaTests(ApiTestBase):
         comment_id = '1785000000000'
         self.api.comment_unlike(comment_id)
         call_api.assert_called_with(
-            'media/{comment_id!s}/comment_unlike/'.format(**{'comment_id': comment_id}),
+            f'media/{comment_id}/comment_unlike/',
             params=self.api.authenticated_params)
 
     def test_comment_likers(self):
@@ -431,7 +430,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.save_photo(self.test_media_id, added_collection_ids=added_collection_ids)
         call_api.assert_called_with(
-            'media/{media_id!s}/save/'.format(**{'media_id': self.test_media_id}),
+            f'media/{self.test_media_id}/save/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -450,7 +449,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.unsave_photo(self.test_media_id, removed_collection_ids=removed_collection_ids)
         call_api.assert_called_with(
-            'media/{media_id!s}/unsave/'.format(**{'media_id': self.test_media_id}),
+            f'media/{self.test_media_id}/unsave/',
             params=params)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -462,7 +461,7 @@ class MediaTests(ApiTestBase):
         }
         self.api.disable_comments(self.test_media_id)
         call_api.assert_called_with(
-            'media/{media_id!s}/disable_comments/'.format(**{'media_id': self.test_media_id}),
+            f'media/{self.test_media_id}/disable_comments/',
             params=params, unsigned=True)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -474,7 +473,7 @@ class MediaTests(ApiTestBase):
         }
         self.api.enable_comments(self.test_media_id)
         call_api.assert_called_with(
-            'media/{media_id!s}/enable_comments/'.format(**{'media_id': self.test_media_id}),
+            f'media/{self.test_media_id}/enable_comments/',
             params=params, unsigned=True)
 
     @unittest.skip('Modifies data.')
@@ -511,8 +510,8 @@ class MediaTests(ApiTestBase):
             randint_mock.return_value = 0
             params = {
                 'reels': {
-                    '1309764653429046112_124317_124317': ['1470356135_{0!s}'.format((int(ts_now) - 1))],
-                    '1309209597843679372_124317_124317': ['1470289967_{0!s}'.format((int(ts_now) - 2))]},
+                    '1309764653429046112_124317_124317': [f'1470356135_{ts_now - 1}'],
+                    '1309209597843679372_124317_124317': [f'1470289967_{ts_now - 2}']},
             }
             reels_params = [
                 {'id': '1309764653429046112_124317', 'taken_at': 1470356135, 'user': {'pk': 124317}},
@@ -534,7 +533,7 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.bulk_delete_comments(media_id, comment_ids)
         call_api.assert_called_with(
-            'media/{media_id!s}/comment/bulk_delete/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/comment/bulk_delete/',
             params=params)
 
     @unittest.skip('Modifies data.')
@@ -561,12 +560,12 @@ class MediaTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.media_only_me(media_id, 2)
         call_api.assert_called_with(
-            'media/{media_id!s}/only_me/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/only_me/',
             params=params, query={'media_type': 2})
 
         self.api.media_only_me(media_id, 2, undo=True)
         call_api.assert_called_with(
-            'media/{media_id!s}/undo_only_me/'.format(**{'media_id': media_id}),
+            f'media/{media_id}/undo_only_me/',
             params=params, query={'media_type': 2})
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -575,7 +574,7 @@ class MediaTests(ApiTestBase):
         story_pk = '170000000'
         self.api.story_viewers(story_pk)
         call_api.assert_called_with(
-            'media/{story_pk!s}/list_reel_media_viewer/'.format(story_pk=story_pk),
+            f'media/{story_pk}/list_reel_media_viewer/',
             query={})
 
     @unittest.skip('Requires valid story PK.')

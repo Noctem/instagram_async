@@ -45,7 +45,7 @@ class HighlightsEndpointsMixin:
 
         :param user_id:
         """
-        endpoint = 'highlights/{user_id!s}/highlights_tray/'.format(user_id=user_id)
+        endpoint = f'highlights/{user_id}/highlights_tray/'
         return self._call_api(endpoint)
 
     def highlight_create(
@@ -99,9 +99,7 @@ class HighlightsEndpointsMixin:
         :param title: Title of the highlight
         :param module: The UI module via which the highlight is created
         """
-        endpoint = 'highlights/{highlight_id!s}/edit_reel/'.format(
-            highlight_id=highlight_id
-        )
+        endpoint = f'highlights/{highlight_id}/edit_reel/'
 
         # sanitise inputs
         if not added_media_ids:
@@ -144,7 +142,5 @@ class HighlightsEndpointsMixin:
 
         :param highlight_id: highlight_id, example 'highlight:1770000'
         """
-        endpoint = 'highlights/{highlight_id!s}/delete_reel/'.format(
-            highlight_id=highlight_id
-        )
+        endpoint = f'highlights/{highlight_id}/delete_reel/'
         return self._call_api(endpoint, params=self.authenticated_params)

@@ -2,7 +2,6 @@ import warnings
 
 from .common import ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
-from ..compat import compat_urllib_parse
 from ..utils import raise_if_invalid_rank_token
 
 
@@ -77,7 +76,7 @@ class FeedEndpointsMixin:
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = 'feed/user/{user_id!s}/'.format(**{'user_id': user_id})
+        endpoint = f'feed/user/{user_id}/'
         res = self._call_api(endpoint, query=kwargs)
 
         if self.auto_patch:
@@ -99,7 +98,7 @@ class FeedEndpointsMixin:
             - **min_timestamp**: For pagination
         :return:
         """
-        endpoint = 'feed/user/{user_name!s}/username/'.format(**{'user_name': user_name})
+        endpoint = f'feed/user/{user_name}/username/'
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -125,7 +124,7 @@ class FeedEndpointsMixin:
         :param kwargs:
         :return:
         """
-        endpoint = 'feed/user/{user_id!s}/reel_media/'.format(**{'user_id': user_id})
+        endpoint = f'feed/user/{user_id}/reel_media/'
         res = self._call_api(endpoint, query=kwargs)
         if self.auto_patch:
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -171,8 +170,7 @@ class FeedEndpointsMixin:
             'rank_token': rank_token
         }
         query_params.update(kwargs)
-        endpoint = 'feed/tag/{tag!s}/'.format(
-            **{'tag': compat_urllib_parse.quote(tag.encode('utf8'))})
+        endpoint = f'feed/tag/{tag}/'
         res = self._call_api(endpoint, query=query_params)
         if self.auto_patch:
             if res.get('items'):
@@ -193,7 +191,7 @@ class FeedEndpointsMixin:
         :param user_id:
         :return:
         """
-        endpoint = 'feed/user/{user_id!s}/story/'.format(**{'user_id': user_id})
+        endpoint = f'feed/user/{user_id}/story/'
         res = self._call_api(endpoint)
         if self.auto_patch and res.get('reel'):
             [ClientCompatPatch.media(m, drop_incompat_keys=self.drop_incompat_keys)
@@ -217,7 +215,7 @@ class FeedEndpointsMixin:
 
         raise_if_invalid_rank_token(rank_token)
 
-        endpoint = 'feed/location/{location_id!s}/'.format(**{'location_id': location_id})
+        endpoint = f'feed/location/{location_id}/'
         query_params = {
             'rank_token': rank_token,
         }

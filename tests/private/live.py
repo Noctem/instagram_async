@@ -87,7 +87,7 @@ class LiveTests(ApiTestBase):
         params.update(self.api.authenticated_params)
         self.api.broadcast_like(broadcast_id, like_count)
         call_api.assert_called_with(
-            'live/{broadcast_id!s}/like/'.format(**{'broadcast_id': broadcast_id}),
+            f'live/{broadcast_id}/like/',
             params=params)
 
     def test_broadcast_like_count(self):
@@ -161,7 +161,7 @@ class LiveTests(ApiTestBase):
             params.update(self.api.authenticated_params)
             self.api.broadcast_comment(broadcast_id, comment_text)
             call_api.assert_called_with(
-                'live/{broadcast_id!s}/comment/'.format(**{'broadcast_id': broadcast_id}),
+                f'live/{broadcast_id}/comment/',
                 params=params)
 
     def test_broadcast_info(self):
@@ -192,7 +192,7 @@ class LiveTests(ApiTestBase):
         }
         self.api.replay_broadcast_comments(broadcast_id, **query)
         call_api.assert_called_with(
-            'live/{broadcast_id!s}/get_post_live_comments/'.format(**{'broadcast_id': broadcast_id}),
+            f'live/{broadcast_id}/get_post_live_comments/',
             query=query)
 
     @compat_mock.patch('instagram_private_api.Client._call_api')
@@ -204,5 +204,5 @@ class LiveTests(ApiTestBase):
         }
         self.api.replay_broadcast_likes(broadcast_id, **query)
         call_api.assert_called_with(
-            'live/{broadcast_id!s}/get_post_live_likes/'.format(**{'broadcast_id': broadcast_id}),
+            f'live/{broadcast_id}/get_post_live_likes/',
             query=query)

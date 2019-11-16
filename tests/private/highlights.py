@@ -87,9 +87,7 @@ class HighlightsTests(ApiTestBase):
             }
         }
         highlight_id = 'highlight:123456'
-        endpoint = 'highlights/{highlight_id!s}/edit_reel/'.format(
-            highlight_id=highlight_id
-        )
+        endpoint = f'highlights/{highlight_id}/edit_reel/'
 
         cover = {
             'media_id': '123456789_001',
@@ -135,9 +133,7 @@ class HighlightsTests(ApiTestBase):
         call_api.return_value = {'status': 'ok'}
 
         highlight_id = 'highlight:1000'
-        endpoint = 'highlights/{highlight_id!s}/delete_reel/'.format(
-            highlight_id=highlight_id
-        )
+        endpoint = f'highlights/{highlight_id}/delete_reel/'
         self.api.highlight_delete(highlight_id)
         call_api.assert_called_with(
             endpoint, params=self.api.authenticated_params)

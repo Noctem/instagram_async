@@ -93,8 +93,8 @@ class AccountsEndpointsMixin:
         :param gender: male: 1, female: 2, unspecified: 3
         :return:
         """
-        if int(gender) not in [1, 2, 3]:
-            raise ValueError('Invalid gender: {0:d}'.format(int(gender)))
+        if int(gender) not in {1, 2, 3}:
+            raise ValueError(f'Invalid gender: {gender}')
         if not email:
             raise ValueError('Email is required.')
 
@@ -145,14 +145,14 @@ class AccountsEndpointsMixin:
         headers['Content-Type'] = content_type
         headers['Content-Length'] = len(body)
 
-        endpoint_url = '{0}{1}'.format(self.api_url.format(version='v1'), endpoint)
+        endpoint_url = '{}{}'.format(self.api_url.format(version='v1'), endpoint)
         req = compat_urllib_request.Request(endpoint_url, body, headers=headers)
         try:
-            self.logger.debug('POST {0!s}'.format(endpoint_url))
+            self.logger.debug(f'POST {endpoint_url}')
             response = self.opener.open(req, timeout=self.timeout)
         except compat_urllib_error.HTTPError as e:
             error_response = self._read_response(e)
-            self.logger.debug('RESPONSE: {0:d} {1!s}'.format(e.code, error_response))
+            self.logger.debug(f'RESPONSE: {e.code} {error_response}')
             ErrorHandler.process(e, error_response)
         except (SSLError, timeout, SocketError,
                 compat_urllib_error.URLError,   # URLError is base of HTTPError
@@ -161,7 +161,7 @@ class AccountsEndpointsMixin:
                 connection_error.__class__.__name__, str(connection_error)))
 
         post_response = self._read_response(response)
-        self.logger.debug('RESPONSE: {0:d} {1!s}'.format(response.code, post_response))
+        self.logger.debug(f'RESPONSE: {response.code} {post_response}')
         json_response = json.loads(post_response)
 
         if self.auto_patch:

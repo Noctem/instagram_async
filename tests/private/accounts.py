@@ -344,7 +344,7 @@ class AccountTests(ApiTestBase):
             MockResponse(),
             compat_urllib_error.HTTPError(
                 self.api.api_url, 500, 'Internal Server Error', {},
-                BytesIO('Internal Server Error'.encode('utf-8')))
+                BytesIO(b'Internal Server Error'))
         ]
         with compat_mock.patch('instagram_private_api.Client._read_response') as read_response, \
                 compat_mock.patch('instagram_private_api.Client.default_headers') as default_headers, \
@@ -357,13 +357,13 @@ class AccountTests(ApiTestBase):
                 {'status': 'ok',
                  'user': {'pk': 123, 'biography': '', 'profile_pic_url': '', 'external_url': ''}})
 
-            photo_data = '...'.encode('ascii')
+            photo_data = b'...'
             json_params = json.dumps(self.api.authenticated_params)
             hash_sig = self.api._generate_signature(json_params)
             signed_body = hash_sig + '.' + json_params
             headers = self.api.default_headers
             headers.update({
-                'Content-Type': 'multipart/form-data; boundary={0!s}'.format(self.api.uuid),
+                'Content-Type': f'multipart/form-data; boundary={self.api.uuid}',
                 'Content-Length': len(photo_data)
             })
             body = '--%(boundary)s\r\n' \
@@ -383,7 +383,7 @@ class AccountTests(ApiTestBase):
                    }
 
             self.api.change_profile_picture(photo_data)
-            endpoint_url = '{0}{1}'.format(self.api.api_url.format(version='v1'), 'accounts/change_profile_picture/')
+            endpoint_url = '{}{}'.format(self.api.api_url.format(version='v1'), 'accounts/change_profile_picture/')
             request.assert_called_with(
                 endpoint_url, body.encode('ascii'), headers=headers)
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .endpoints.common import MediaTypes
 
 
@@ -124,7 +123,7 @@ class ClientCompatPatch:
     @classmethod
     def media(cls, media, drop_incompat_keys=False):
         """Patch a media object"""
-        media['link'] = 'https://www.instagram.com/p/{0!s}/'.format(media['code'])
+        media['link'] = f"https://www.instagram.com/p/{media['code']}/"
         media['created_time'] = str(int(media.get('taken_at') or media.get('device_timestamp')))
 
         if media['media_type'] == MediaTypes.PHOTO:

@@ -51,5 +51,5 @@ class UsertagsTests(ApiTestBase):
         }
         self.api.usertag_self_remove(media_id)
         call_api.assert_called_with(
-            'usertags/{media_id!s}/remove/'.format(**{'media_id': media_id}),
+            f'usertags/{media_id}/remove/',
             params=self.api.authenticated_params)

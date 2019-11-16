@@ -29,7 +29,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    print('Client version: {0!s}'.format(client_version))
+    print(f'Client version: {client_version}')
     api = Client(args.username, args.password)
 
     # ---------- Pagination with max_id ----------
