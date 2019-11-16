@@ -2,7 +2,7 @@
 
 A Python wrapper for the Instagram private API with no 3rd party dependencies. Supports both the app and web APIs.
 
-![Python 2.7, 3.5](https://img.shields.io/badge/Python-2.7%2C%203.5-3776ab.svg?maxAge=2592000)
+![Python 3.7, 3.8](https://img.shields.io/badge/Python-3.7%2C%203.8-3776ab.svg?maxAge=2592000)
 [![Release](https://img.shields.io/github/release/ping/instagram_private_api.svg?colorB=ff7043)](https://github.com/ping/instagram_private_api/releases)
 [![Docs](https://img.shields.io/badge/docs-readthedocs.io-ff4980.svg?maxAge=2592000)](https://instagram-private-api.readthedocs.io/en/latest/)
 [![Build](https://img.shields.io/travis/com/ping/instagram_private_api.svg)](https://travis-ci.com/ping/instagram_private_api)
@@ -32,7 +32,6 @@ Problems? Please check the [docs](https://instagram-private-api.readthedocs.io/e
     * Get [post comments](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client.media_comments)
     * And [more](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.Client)!
 - Compatible with functions available through the public API using the ClientCompatPatch ([app](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_private_api.ClientCompatPatch)/[web](https://instagram-private-api.readthedocs.io/en/latest/api.html#instagram_web_api.ClientCompatPatch)) utility class
-- Beta Python 3 support
 
 An [extension module](https://github.com/ping/instagram_private_api_extensions) is available to help with common tasks like pagination, posting photos or videos.
 
@@ -54,7 +53,7 @@ To update with latest repo code:
 
 ``pip install git+https://git@github.com/ping/instagram_private_api.git --upgrade --force-reinstall``
 
-Tested on Python 2.7 and 3.5.
+Tested on Python 3.8.
 
 ## Usage
 

@@ -14,7 +14,6 @@ Features
 - Supports many functions that are only available through the official app
 - The web api client supports a subset of functions that do not require login
 - Compatibility patch available to match the public API methods
-- Beta Python 3 support.
 
 .. toctree::
    :maxdepth: 2
