@@ -5,7 +5,7 @@ from ..constants import Constants
 from ..compatpatch import ClientCompatPatch
 
 
-class MiscEndpointsMixin(object):
+class MiscEndpointsMixin:
     """For miscellaneous functions."""
 
     def sync(self, prelogin=False):

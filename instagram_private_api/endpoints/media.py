@@ -9,7 +9,7 @@ from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
 
 
-class MediaEndpointsMixin(object):
+class MediaEndpointsMixin:
     """For endpoints in ``/media/``."""
 
     def media_info(self, media_id):

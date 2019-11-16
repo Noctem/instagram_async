@@ -2,7 +2,7 @@
 from .endpoints.common import MediaTypes
 
 
-class ClientCompatPatch(object):
+class ClientCompatPatch:
     """Utility to make entities from the private api similar to the ones
     from the public one by adding the necessary properties, and if required,
     remove any incompatible properties (to save storage space for example).

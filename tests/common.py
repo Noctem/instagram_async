@@ -79,7 +79,7 @@ class ApiTestBase(unittest.TestCase):
         time.sleep(self.sleep_interval)
 
 
-class MockResponse(object):
+class MockResponse:
     """A mock class to emulate api responses."""
 
     def __init__(self, code=200, content_type='', body=''):

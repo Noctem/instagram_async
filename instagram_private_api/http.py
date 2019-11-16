@@ -34,7 +34,7 @@ class ClientCookieJar(compat_cookiejar.CookieJar):
         return compat_pickle.dumps(self._cookies)
 
 
-class MultipartFormDataEncoder(object):
+class MultipartFormDataEncoder:
     """
     Modified from
     http://stackoverflow.com/questions/1270518/python-standard-library-to-post-multipart-form-data-encoded-data

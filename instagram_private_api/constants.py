@@ -1,5 +1,5 @@
 
-class Constants(object):
+class Constants:
     """Constants holder class that stores the bulk of the fixed strings used in the library."""
 
     IG_SIG_KEY = '19ce5f445dbfd9d29c59dc2a78c616a7fc090a8e018b9267bc4240a30244c53b'

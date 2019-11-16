@@ -6,7 +6,7 @@ import re
 logger = logging.getLogger(__name__)
 
 
-class ClientErrorCodes(object):
+class ClientErrorCodes:
     """Holds static constant values for the http error codes returned from IG"""
 
     INTERNAL_SERVER_ERROR = 500
@@ -86,7 +86,7 @@ class ClientFeedbackRequiredError(ClientError):
     pass
 
 
-class ErrorHandler(object):
+class ErrorHandler:
 
     KNOWN_ERRORS_MAP = [
         {'patterns': ['bad_password', 'invalid_user'], 'error': ClientLoginError},

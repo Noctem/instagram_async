@@ -18,7 +18,7 @@ except NameError:  # Python 2:
         pass
 
 
-class AccountsEndpointsMixin(object):
+class AccountsEndpointsMixin:
     """For endpoints in ``/accounts/``."""
 
     def login(self):

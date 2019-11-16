@@ -4,7 +4,7 @@ from .common import ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
 
 
-class DiscoverEndpointsMixin(object):
+class DiscoverEndpointsMixin:
     """For endpoints in ``/discover/``."""
 
     def explore(self, **kwargs):

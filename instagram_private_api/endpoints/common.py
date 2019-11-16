@@ -11,7 +11,7 @@ class ClientExperimentalWarning(UserWarning):
     pass
 
 
-class MediaTypes(object):
+class MediaTypes:
     """Psuedo enum-ish/lookup class for media types."""
 
     PHOTO = 1       #: Photo type

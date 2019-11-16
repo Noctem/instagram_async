@@ -4,7 +4,7 @@ from .common import ClientExperimentalWarning, ClientDeprecationWarning
 from ..compatpatch import ClientCompatPatch
 
 
-class UsersEndpointsMixin(object):
+class UsersEndpointsMixin:
     """For endpoints in ``/users/``."""
 
     def user_info(self, user_id):

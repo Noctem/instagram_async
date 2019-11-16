@@ -5,7 +5,7 @@ from ..utils import raise_if_invalid_rank_token
 from ..compatpatch import ClientCompatPatch
 
 
-class TagsEndpointsMixin(object):
+class TagsEndpointsMixin:
     """For endpoints in ``/tags/``."""
 
     def tag_info(self, tag):

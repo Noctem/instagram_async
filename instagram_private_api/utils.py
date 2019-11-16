@@ -41,7 +41,7 @@ def gen_user_breadcrumb(size):
         base64.b64encode(data.encode('ascii')))
 
 
-class Chunk(object):
+class Chunk:
     """
     Simple object class to encapulate an upload Chunk
     """
@@ -188,7 +188,7 @@ def ig_chunk_generator(file_data, max_chunk_size=(500 * 1024)):
             yield chunk, file_data[chunk.start: chunk.end]
 
 
-class InstagramID(object):
+class InstagramID:
     """
     Utility class to convert between IG's internal numeric ID and the shortcode used in weblinks.
     Does NOT apply to private accounts.

@@ -26,7 +26,7 @@ except NameError:  # Python 2:
         pass
 
 
-class MediaRatios(object):
+class MediaRatios:
     """
     Class holding valid aspect ratios (width: height) for media uploads.
     """
@@ -42,7 +42,7 @@ class MediaRatios(object):
     reel = min(__aspect_ratios), max(__aspect_ratios)
 
 
-class UploadEndpointsMixin(object):
+class UploadEndpointsMixin:
     """For endpoints relating to upload functionality."""
 
     EXTERNAL_LOC_SOURCES = {

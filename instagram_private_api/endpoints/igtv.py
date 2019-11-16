@@ -5,7 +5,7 @@ from ..compatpatch import ClientCompatPatch
 USER_CHANNEL_ID_RE = r'^user_[1-9]\d+$'
 
 
-class IGTVEndpointsMixin(object):
+class IGTVEndpointsMixin:
     """For endpoints in ``/igtv/``."""
 
     def tvchannel(self, channel_id, **kwargs):

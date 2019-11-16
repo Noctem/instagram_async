@@ -2,7 +2,7 @@ from ..utils import gen_user_breadcrumb
 from ..compatpatch import ClientCompatPatch
 
 
-class LiveEndpointsMixin(object):
+class LiveEndpointsMixin:
     """For endpoints in ``/live/``."""
 
     def user_broadcast(self, user_id):

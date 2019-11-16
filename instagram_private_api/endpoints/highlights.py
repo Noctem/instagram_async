@@ -1,7 +1,7 @@
 import json
 
 
-class HighlightsEndpointsMixin(object):
+class HighlightsEndpointsMixin:
     """For endpoints in ``/highlights/`` or related to the highlights feature."""
 
     def stories_archive(self, **kwargs):

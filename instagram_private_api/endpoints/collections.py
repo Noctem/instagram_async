@@ -2,7 +2,7 @@ import json
 from ..compatpatch import ClientCompatPatch
 
 
-class CollectionsEndpointsMixin(object):
+class CollectionsEndpointsMixin:
     """For endpoints in related to collections functionality."""
 
     def list_collections(self):

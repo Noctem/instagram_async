@@ -5,7 +5,7 @@ from ..utils import raise_if_invalid_rank_token
 from ..compatpatch import ClientCompatPatch
 
 
-class LocationsEndpointsMixin(object):
+class LocationsEndpointsMixin:
     """For endpoints related to location functionality."""
 
     def location_info(self, location_id):

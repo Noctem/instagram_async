@@ -5,7 +5,7 @@ from ..compatpatch import ClientCompatPatch
 from ..utils import raise_if_invalid_rank_token
 
 
-class FriendshipsEndpointsMixin(object):
+class FriendshipsEndpointsMixin:
     """For endpoints in ``/friendships/``."""
 
     def autocomplete_user_list(self):
